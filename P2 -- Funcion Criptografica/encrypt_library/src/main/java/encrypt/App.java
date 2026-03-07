@@ -8,9 +8,9 @@ public final class App {
     public static void main(String[] args) throws Exception {
 
         // Archives
-        FileData input = new FileData("src/main/resources/BaseTXT/p.txt");
-        FileData encryptedFile = new FileData("src/main/resources/EncryptTXT/p-e.txt");
-        FileData decryptedFile = new FileData("src/main/resources/DecryptTXT/p-e-d.txt");
+        FileData input = new FileData("src/main/resources/BaseTXT/Imagen.bmp");
+        FileData encryptedFile = new FileData("src/main/resources/EncryptTXT/Imagen_e.bmp");
+        FileData decryptedFile = new FileData("src/main/resources/DecryptTXT/Imagen_e_d.bmp");
 
         // Read data
         input.read();
