@@ -36,7 +36,6 @@ Su programa debe tener una interfaz que
 - **Selección de archivo**: la ruta del archivo de entrada está hardcodeada; el usuario no puede elegirla
 - **Selección de llave**: las llaves se generan nuevas en cada ejecución y no se guardan; no es posible cargar una llave existente
 - **Menú de cifrado/descifrado**: no existe opción para elegir entre solo cifrar, solo descifrar, o ambas operaciones
-- **Soporte para archivos `.bmp`**: actualmente solo se prueba con `.txt`
 - **Persistencia de llaves**: las llaves RSA generadas no se exportan ni almacenan para uso posterior
 
 ---
