@@ -50,7 +50,9 @@ P2 -- Funcion Criptografica/
         └── main/
             ├── java/
             │   └── encrypt/
-            │       └── App.java          ← lógica principal (cifrado/descifrado RSA)
+            │       ├── App.java          ← punto de entrada, orquesta el flujo
+            │       ├── Encrypt.java      ← maneja generación de llaves RSA y cifrado/descifrado
+            │       └── FileData.java     ← maneja lectura y escritura de archivos
             └── resources/
                 ├── BaseTXT/
                 │   └── p.txt             ← archivo de entrada (texto a cifrar)
