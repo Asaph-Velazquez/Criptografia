@@ -8,10 +8,8 @@ import javax.crypto.Cipher;
 public class Encrypt {
 
     private static final int RSA_KEY_SIZE = 2048;
-    // Max plaintext block: key_size_bytes - 11 (PKCS1 padding overhead)
     private static final int ENCRYPT_BLOCK_SIZE = (RSA_KEY_SIZE / 8) - 11; // 245 bytes
-    // Ciphertext block is always key_size_bytes
-    private static final int DECRYPT_BLOCK_SIZE = RSA_KEY_SIZE / 8;         // 256 bytes
+    private static final int DECRYPT_BLOCK_SIZE = RSA_KEY_SIZE / 8;        // 256 bytes
     private KeyPair keys;
 
     public Encrypt() throws Exception {
