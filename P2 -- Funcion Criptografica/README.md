@@ -28,6 +28,7 @@ Su programa debe tener una interfaz que
 - Lee un archivo `p.txt` desde `src/main/resources/BaseTXT/`
 - Cifra el contenido con la llave pública y escribe el resultado en `EncryptTXT/p-e.txt`
 - Descifra el archivo cifrado con la llave privada y escribe el resultado en `DecryptTXT/p-e-d.txt`
+- Soporte para archivos `.bmp`: actualmente ya se puede probar con `.bmp`
 - Imprime `"Proceso terminado"` al finalizar
 
 ### ❌ Lo que falta
