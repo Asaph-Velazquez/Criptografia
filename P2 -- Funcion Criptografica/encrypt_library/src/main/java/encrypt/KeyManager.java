@@ -1,61 +1,55 @@
 package encrypt;
 
 import java.io.FileWriter;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 
 public class KeyManager {
 
-    public static void saveKeys(PublicKey publicKey, PrivateKey privateKey) throws Exception {
+    public static void saveKeys(BigInteger n, BigInteger e, BigInteger d) throws Exception {
 
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
 
         String publicFile = "public_key_" + timestamp + ".key";
         String privateFile = "private_key_" + timestamp + ".key";
 
-        writeKey(publicFile, publicKey.getEncoded());
-        writeKey(privateFile, privateKey.getEncoded());
+        writeKey(publicFile, n, e);
+        writeKey(privateFile, n, d);
     }
 
-    private static void writeKey(String fileName, byte[] keyBytes) throws Exception {
+    private static void writeKey(String fileName, BigInteger n, BigInteger exp) throws Exception {
 
-        String base64 = Base64.getEncoder().encodeToString(keyBytes);
         FileWriter writer = new FileWriter(fileName);
 
-        writer.write(base64);
+        writer.write(n.toString(16) + "\n");
+        writer.write(exp.toString(16));
         writer.close();
         
     }
 
-    public static PublicKey loadPublicKey(String path) throws Exception {
+    public static BigInteger[] loadPublicKey(String path) throws Exception {
 
-        String base64 = Files.readString(Path.of(path));
-        byte[] keyBytes = Base64.getDecoder().decode(base64);
+        String[] lines = Files.readString(Path.of(path)).split("\n");
 
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-        KeyFactory factory = KeyFactory.getInstance("RSA");
+        BigInteger n = new BigInteger(lines[0],16);
+        BigInteger e = new BigInteger(lines[1],16);
         
-        return factory.generatePublic(spec);
+        return new BigInteger[]{n,e};
         
     }
 
-    public static PrivateKey loadPrivateKey(String path) throws Exception {
+    public static BigInteger[] loadPrivateKey(String path) throws Exception {
 
-        String base64 = Files.readString(Path.of(path));
-        byte[] keyBytes = Base64.getDecoder().decode(base64);
+        String[] lines = Files.readString(Path.of(path)).split("\n");
+
+        BigInteger n = new BigInteger(lines[0],16);
+        BigInteger d = new BigInteger(lines[1],16);
         
-        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory factory = KeyFactory.getInstance("RSA");
-        
-        return factory.generatePrivate(spec);
+        return new BigInteger[]{n,d};
         
     }
     

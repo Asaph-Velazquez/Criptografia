@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.math.BigInteger;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -140,7 +141,7 @@ public class GUI extends JFrame {
             Encrypt rsa = new Encrypt();
             rsa.generateKeys();
 
-            KeyManager.saveKeys(rsa.getPublicKey(), rsa.getPrivateKey());
+            KeyManager.saveKeys(rsa.getN(), rsa.getE(), rsa.getD());
 
             JOptionPane.showMessageDialog(this, "Llaves generadas correctamente");
 
@@ -171,7 +172,8 @@ public class GUI extends JFrame {
 
         Encrypt rsa = new Encrypt();
 
-        rsa.setPublicKey(KeyManager.loadPublicKey(keyPath));
+        BigInteger[] key = KeyManager.loadPublicKey(keyPath);
+        rsa.setPublicKey(key[0], key[1]);
 
         FileData input = new FileData(inputPath);
         input.read();
@@ -189,7 +191,8 @@ public class GUI extends JFrame {
 
         Encrypt rsa = new Encrypt();
 
-        rsa.setPrivateKey(KeyManager.loadPrivateKey(keyPath));
+        BigInteger[] key = KeyManager.loadPrivateKey(keyPath);
+        rsa.setPrivateKey(key[0], key[1]);
 
         FileData input = new FileData(inputPath);
         input.read();
