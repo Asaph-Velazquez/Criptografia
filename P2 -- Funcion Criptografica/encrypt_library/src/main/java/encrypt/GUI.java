@@ -13,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
@@ -117,24 +118,89 @@ public class GUI extends JFrame {
     }
 
     private void selectKey(ActionEvent e) {
+        
         JFileChooser chooser = new JFileChooser();
-        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) 
             keyPath = chooser.getSelectedFile().getAbsolutePath();
-        }
+        
     }
 
     private void selectFile(ActionEvent e) {
+        
         JFileChooser chooser = new JFileChooser();
-        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) 
             filePath = chooser.getSelectedFile().getAbsolutePath();
-        }
+            
     }
 
-    private void generateKeys() {
-        // TODO Implementar generación de llaves
+     private void generateKeys() {
+
+        try {
+
+            Encrypt rsa = new Encrypt();
+            rsa.generateKeys();
+
+            KeyManager.saveKeys(rsa.getPublicKey(), rsa.getPrivateKey());
+
+            JOptionPane.showMessageDialog(this, "Llaves generadas correctamente");
+
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        
     }
 
     private void execute() {
-        // TODO Implementar ejecución
+        
+        try {
+
+            if(encryptRB.isSelected())
+                encryptFile(keyPath,filePath);
+            else
+                decryptFile(keyPath,filePath);
+
+            JOptionPane.showMessageDialog(this, "Proceso terminado");
+
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        
     }
+
+    public void encryptFile(String keyPath, String inputPath) throws Exception {
+
+        Encrypt rsa = new Encrypt();
+
+        rsa.setPublicKey(KeyManager.loadPublicKey(keyPath));
+
+        FileData input = new FileData(inputPath);
+        input.read();
+
+        byte[] encrypted = rsa.encrypt(input.getData());
+
+        String output = inputPath.replaceFirst("(\\.[^.]*)?$", "_enc$1");
+
+        FileData out = new FileData(output);
+        out.write(encrypted);
+        
+    }
+
+    public void decryptFile(String keyPath, String inputPath) throws Exception {
+
+        Encrypt rsa = new Encrypt();
+
+        rsa.setPrivateKey(KeyManager.loadPrivateKey(keyPath));
+
+        FileData input = new FileData(inputPath);
+        input.read();
+
+        byte[] decrypted = rsa.decrypt(input.getData());
+
+        String output = inputPath.replaceFirst("(\\.[^.]*)?$", "_dec$1");
+
+        FileData out = new FileData(output);
+        out.write(decrypted);
+        
+    }
+    
 }

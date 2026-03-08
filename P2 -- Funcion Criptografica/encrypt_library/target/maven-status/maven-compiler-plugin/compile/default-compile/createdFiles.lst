@@ -1,4 +1,5 @@
-encrypt\FileData.class
+encrypt\KeyManager.class
 encrypt\GUI.class
 encrypt\App.class
 encrypt\Encrypt.class
+encrypt\FileData.class
