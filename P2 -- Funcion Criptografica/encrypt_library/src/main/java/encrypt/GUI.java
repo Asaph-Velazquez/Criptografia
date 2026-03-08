@@ -131,10 +131,10 @@ public class GUI extends JFrame {
     }
 
     private void generateKeys() {
-        // Implementar generación de llaves
+        // TODO Implementar generación de llaves
     }
 
     private void execute() {
-        // Implementar ejecución
+        // TODO Implementar ejecución
     }
 }
