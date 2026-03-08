@@ -187,7 +187,7 @@ public class GUI extends JFrame {
                 suffix = "_descifrado";
             }
 
-            // Derivar nombre de archivo de salida sugerido
+            //Generate output file name
             File inputFile = new File(filePath);
             String name = inputFile.getName();
             int dot = name.lastIndexOf('.');

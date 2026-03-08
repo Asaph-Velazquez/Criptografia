@@ -31,7 +31,7 @@ public class Encrypt {
         this.keys = keys;
     }
 
-    /** Guarda el par de llaves en un archivo binario .key */
+    // Save the private and public keys to a .key file (private first, then public)
     public void saveKeys(String path) throws Exception {
         byte[] privateBytes = keys.getPrivate().getEncoded(); // PKCS8
         byte[] publicBytes  = keys.getPublic().getEncoded();  // X.509
@@ -43,7 +43,7 @@ public class Encrypt {
         }
     }
 
-    /** Carga un Encrypt desde un archivo .key generado por saveKeys() */
+   // Load the private and public keys from a .key file
     public static Encrypt loadFromFile(String path) throws Exception {
         try (DataInputStream dis = new DataInputStream(new FileInputStream(path))) {
             int privLen = dis.readInt();
