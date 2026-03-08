@@ -1,4 +1,5 @@
 package encrypt;
+import encrypt.GUI;
 
 public final class App {
 

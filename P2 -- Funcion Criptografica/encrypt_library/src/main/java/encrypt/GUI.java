@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -13,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
@@ -131,10 +133,82 @@ public class GUI extends JFrame {
     }
 
     private void generateKeys() {
-        // Implementar generación de llaves
+        try {
+            Encrypt enc = new Encrypt();
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Guardar llave");
+            chooser.setSelectedFile(new File("mykey.key"));
+            if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                String path = chooser.getSelectedFile().getAbsolutePath();
+                if (!path.endsWith(".key")) path += ".key";
+                enc.saveKeys(path);
+                JOptionPane.showMessageDialog(this,
+                    "Llaves guardadas en:\n" + path,
+                    "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                "Error al generar llaves: " + ex.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void execute() {
-        // Implementar ejecución
+        if (!encryptRB.isSelected() && !decryptRB.isSelected()) {
+            JOptionPane.showMessageDialog(this,
+                "Selecciona Cifrar o Descifrar primero.",
+                "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (keyPath == null) {
+            JOptionPane.showMessageDialog(this,
+                "Selecciona un archivo de llave (.key) primero.",
+                "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (filePath == null) {
+            JOptionPane.showMessageDialog(this,
+                "Selecciona el archivo a procesar primero.",
+                "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        try {
+            Encrypt enc = Encrypt.loadFromFile(keyPath);
+            FileData input = new FileData(filePath);
+            input.read();
+
+            byte[] result;
+            String suffix;
+            if (encryptRB.isSelected()) {
+                result = enc.encrypt(input.getData());
+                suffix = "_cifrado";
+            } else {
+                result = enc.decrypt(input.getData());
+                suffix = "_descifrado";
+            }
+
+            // Derivar nombre de archivo de salida sugerido
+            File inputFile = new File(filePath);
+            String name = inputFile.getName();
+            int dot = name.lastIndexOf('.');
+            String outName = (dot >= 0)
+                ? name.substring(0, dot) + suffix + name.substring(dot)
+                : name + suffix;
+
+            JFileChooser chooser = new JFileChooser(inputFile.getParentFile());
+            chooser.setDialogTitle("Guardar resultado");
+            chooser.setSelectedFile(new File(inputFile.getParentFile(), outName));
+            if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                FileData output = new FileData(chooser.getSelectedFile().getAbsolutePath());
+                output.write(result);
+                JOptionPane.showMessageDialog(this,
+                    "Archivo procesado y guardado correctamente.",
+                    "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                "Error: " + ex.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
