@@ -25,18 +25,18 @@ Su programa debe tener una interfaz que
 
 ### ✅ Lo que ya hace
 - Genera un par de llaves RSA de 2048 bits (`KeyPairGenerator`)
-- Lee un archivo `p.txt` desde `src/main/resources/BaseTXT/`
-- Cifra el contenido con la llave pública y escribe el resultado en `EncryptTXT/p-e.txt`
-- Descifra el archivo cifrado con la llave privada y escribe el resultado en `DecryptTXT/p-e-d.txt`
-- Soporte para archivos `.bmp`: actualmente ya se puede probar con `.bmp`
-- Imprime `"Proceso terminado"` al finalizar
-
-### ❌ Lo que falta
-- **Interfaz de usuario**: no hay menú ni selección interactiva de archivos o llaves
-- **Selección de archivo**: la ruta del archivo de entrada está hardcodeada; el usuario no puede elegirla
-- **Selección de llave**: las llaves se generan nuevas en cada ejecución y no se guardan; no es posible cargar una llave existente
-- **Menú de cifrado/descifrado**: no existe opción para elegir entre solo cifrar, solo descifrar, o ambas operaciones
-- **Persistencia de llaves**: las llaves RSA generadas no se exportan ni almacenan para uso posterior
+- **Guarda las llaves** en un archivo `.key` binario (llave privada en PKCS8 + llave pública en X.509)
+- **Carga llaves** desde un archivo `.key` existente para reutilizarlas entre sesiones
+- Cifra datos con la llave pública en bloques de 245 bytes (RSA/ECB/PKCS1Padding)
+- Descifra datos con la llave privada en bloques de 256 bytes
+- Soporta cualquier tipo de archivo: `.txt`, `.bmp`, etc.
+- **Interfaz gráfica (GUI)** con las siguientes funciones:
+  - Botón **"Generar Llaves"**: crea un nuevo par RSA y abre un diálogo para guardar el archivo `.key`
+  - Radio buttons **"Cifrar" / "Descifrar"**: selecciona la operación a realizar
+  - Botón **"Subir Llave"**: abre un `JFileChooser` para cargar el archivo `.key`
+  - Botón **"Subir Archivo"**: abre un `JFileChooser` para seleccionar el archivo a procesar
+  - Botón **"Cifrar"/"Descifrar"**: ejecuta la operación y abre un diálogo para guardar el resultado con nombre sugerido automáticamente (`_cifrado` / `_descifrado`)
+  - Manejo de errores con ventanas de diálogo informativas
 
 ---
 
@@ -50,16 +50,16 @@ P2 -- Funcion Criptografica/
         └── main/
             ├── java/
             │   └── encrypt/
-            │       ├── App.java          ← punto de entrada, orquesta el flujo
-            │       ├── Encrypt.java      ← maneja generación de llaves RSA y cifrado/descifrado
-            │       └── FileData.java     ← maneja lectura y escritura de archivos
+            │       ├── App.java          ← punto de entrada, lanza la GUI
+            │       ├── Encrypt.java      ← RSA: genera, guarda, carga llaves y cifra/descifra
+            │       ├── FileData.java     ← maneja lectura y escritura de archivos
+            │       └── GUI.java          ← interfaz gráfica (Swing)
             └── resources/
                 ├── BaseTXT/
-                │   └── p.txt             ← archivo de entrada (texto a cifrar)
-                ├── EncryptTXT/
-                │   └── p-e.txt           ← resultado cifrado (generado al correr)
-                └── DecryptTXT/
-                    └── p-e-d.txt         ← resultado descifrado (generado al correr)
+                │   └── p.txt             ← archivo de ejemplo
+                ├── EncryptTXT/           ← carpeta sugerida para resultados cifrados
+                ├── DecryptTXT/           ← carpeta sugerida para resultados descifrados
+                └── keys/                 ← carpeta sugerida para guardar archivos .key
 ```
 
 ---
@@ -86,8 +86,4 @@ mvn exec:java -Dexec.mainClass="encrypt.App"
 O desde la raíz del workspace con VS Code, usando el botón **Run** en `App.java`.
 
 ### Resultado esperado
-Los archivos `p-e.txt` (cifrado) y `p-e-d.txt` (descifrado) se generarán en sus respectivas carpetas dentro de `src/main/resources/`, y la consola mostrará:
-
-```
-Proceso terminado
-```
+Se abre la ventana de la GUI. Desde ahí puedes generar un `.key`, seleccionarlo, cargar un archivo y cifrarlo o descifrarlo. El archivo resultante se guarda donde el usuario indique.
