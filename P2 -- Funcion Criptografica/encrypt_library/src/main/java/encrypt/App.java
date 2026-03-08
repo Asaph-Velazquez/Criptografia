@@ -28,5 +28,7 @@ public final class App {
         decryptedFile.write(decryptedData);
 
         System.out.println("Proceso terminado");
+        
+        new GUI();
     }
 }
