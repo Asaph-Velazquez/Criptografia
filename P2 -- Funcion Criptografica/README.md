@@ -1,255 +1,62 @@
-# Práctica 2 — Función Criptográfica
+# Practica 2 -- Funcion Criptografica
 
-**Equipo:** 3 personas  
-**Objetivo:** Implementar una función criptográfica asimétrica (**RSA**) capaz de **cifrar y descifrar archivos completos** (por ejemplo `.txt`, `.bmp`, etc.).
-
----
-
-## Flujo General del Sistema
+En equipos de 3 personas  
+Implementar cualquier función criptografica con archivos .txt o .bmp
 
 ```text
- ____________________      ____________________      ____________________      ____________________      ____________________
+ ____________________      ____________________      ____________________      ____________________     ____________________
 |                    |    |                    |    |                    |    |                    |    |                   |
-|       P.txt        | -> |       Encrypt      | -> |       p-e.txt      | -> |       Decrypt      | -> |     p-e-d.txt     |
-|   (Archivo Base)   |    |       (Llave)      |    |     (Encrypted)    |    |       (Llave)      |    |    (Decrypted)    |
+|       P.txt        | -> |        Encypt      | -> |       p-e.txt      | -> |       Decrypt      | -> |     p-e-d.txt     |
+|                    |    |       (llave)      |    |     (Encrypted)    |    |       (llave)      |    |    (Decrypted)    |
 |____________________|    |____________________|    |____________________|    |____________________|    |___________________|
 ```
 
-El sistema cuenta con una **interfaz gráfica (GUI) responsiva** que permite:
+Su programa debe tener una interfaz que:
 
-* Generar un par de **llaves criptográficas RSA**
-* Seleccionar el **archivo a procesar** y la **llave correspondiente**
-* Elegir la operación a realizar mediante un menú sencillo (**Cifrar / Descifrar**)
+1. Seleccione archivo y llave  
+2. Menú para cifrado/decifrado  
 
----
+Además se implementó una **interfaz gráfica (GUI)** que permite:
 
-# Librerías utilizadas en Java
-
-## Lógica Criptográfica
-
-Se utilizan las siguientes librerías para implementar RSA:
-
-* `javax.crypto.*`  
-  Inicialización de cifradores mediante la clase `Cipher`.
-
-* `javax.security.*`  
-  Generación y manejo del `KeyPair` para RSA.
-
-* `java.security.spec.*`  
-  Manejo de codificación de llaves en formato **PKCS8** y **X509**.
+- Generar un par de **llaves RSA**
+- Seleccionar **archivo y llave** usando explorador de archivos
+- Elegir **Cifrar o Descifrar**
+- Guardar el archivo resultado automáticamente
 
 ---
 
-## Interfaz Gráfica (GUI)
+## Librerias en Java
 
-Para la interfaz se utilizan componentes de **Swing** y herramientas de layout:
-
-* `javax.swing.*`  
-  Componentes visuales como:
-
-  * `JFrame`
-  * `JButton`
-  * `JLabel`
-  * `JFileChooser`
-
-* `java.awt.*`  
-  Manejo de layouts y estilos visuales:
-
-  * `GridBagLayout`
-  * `BoxLayout`
-  * manejo de colores y fuentes
-
-* `java.awt.event.*`  
-  Manejo de eventos de interfaz como:
-
-  * clicks en botones
-  * redimensionamiento dinámico de la ventana
+* `javax.crypto`
+* `javax.security`
+* `javax.swing` (para la interfaz gráfica)
 
 ---
 
-# Estado del Proyecto
+## Estado del proyecto
 
-## Backend — Lógica de Cifrado y Descifrado
+### ✅ Lo que ya hace
 
-✔ **Generación de llaves**
+- Genera un par de llaves RSA de 2048 bits (`KeyPairGenerator`)
+- **Guarda las llaves** en un archivo `.key` binario (llave privada en PKCS8 + llave pública en X.509)
+- **Carga llaves** desde un archivo `.key` existente para reutilizarlas entre sesiones
+- Cifra datos con la llave pública en bloques de **245 bytes** (`RSA/ECB/PKCS1Padding`)
+- Descifra datos con la llave privada en bloques de **256 bytes**
+- Soporta cualquier tipo de archivo: `.txt`, `.bmp`, etc.
 
-Se genera un par de llaves RSA de **2048 bits** utilizando `KeyPairGenerator`.
+### Interfaz gráfica (GUI)
 
----
+La GUI fue implementada con **Java Swing** y permite:
 
-✔ **Almacenamiento seguro**
-
-Las llaves se guardan en un archivo `.key` binario que contiene:
-
-* llave privada en formato **PKCS8**
-* llave pública en formato **X509**
-
----
-
-✔ **Persistencia**
-
-El sistema permite **cargar llaves desde un archivo `.key` existente**, lo que permite reutilizarlas en futuras ejecuciones.
+- Botón **Generar Llaves** para crear el archivo `.key`
+- Botón **Subir Llave** para cargar la llave
+- Botón **Subir Archivo** para seleccionar el archivo
+- Selección **Cifrar / Descifrar**
+- Botón **Ejecutar** para realizar la operación y guardar el resultado
 
 ---
 
-✔ **Cifrado por bloques**
-
-Los datos se cifran utilizando la llave pública en bloques de:
-
-```
-245 bytes
-```
-
-con el algoritmo:
-
-```
-RSA/ECB/PKCS1Padding
-```
-
----
-
-✔ **Descifrado por bloques**
-
-Los datos cifrados se descifran con la llave privada en bloques de:
-
-```
-256 bytes
-```
-
----
-
-✔ **Soporte multiformato**
-
-El sistema trabaja **directamente a nivel de bytes**, por lo que puede procesar cualquier tipo de archivo, por ejemplo:
-
-* `.txt`
-* `.bmp`
-* `.pdf`
-* `.png`
-* etc.
-
----
-
-# Interfaz Gráfica (UX / UI)
-
-✔ **Diseño Responsivo**
-
-Se utiliza `GridBagLayout` para mantener la tarjeta principal centrada aunque la ventana cambie de tamaño, simulando un comportamiento similar a **Flexbox**.
-
----
-
-✔ **Escalado dinámico**
-
-Se implementa un `ComponentListener` que calcula proporciones para **aumentar o reducir el tamaño del texto automáticamente** según el tamaño de la ventana.
-
----
-
-✔ **Paleta de colores tipo Dark Mode**
-
-Se utilizan colores inspirados en **Tailwind CSS**:
-
-* `Slate-900`
-* `Slate-800`
-* `Emerald-500`
-* `Blue-500`
-
-Esto da una apariencia moderna a la aplicación.
-
----
-
-✔ **Feedback en tiempo real**
-
-En la parte inferior de la interfaz se encuentra un `statusLabel` que informa al usuario:
-
-* qué archivo se cargó
-* si ocurrió algún error
-* estado actual del sistema
-
-Esto evita saturar la interfaz con ventanas emergentes.
-
----
-
-✔ **Flujo inteligente**
-
-Los botones:
-
-* **Subir Llave**
-* **Subir Archivo**
-* **Ejecutar**
-
-permanecen **ocultos hasta que el usuario selecciona el modo de operación** (Cifrar o Descifrar).
-
----
-
-✔ **Nombrado automático de archivos**
-
-Al guardar el resultado, el sistema detecta la extensión original y genera automáticamente un nombre de salida.
-
-Ejemplo:
-
-```
-foto.bmp → foto_cifrado.bmp
-```
-
----
-
-# Flujo de Trabajo de la GUI
-
-```text
- ____________________      ____________________      ____________________      ____________________
-|                    |    |                    |    |                    |    |                    |
-| 1. Generar Llaves  | -> | 2. Seleccionar Modo| -> | 3. Cargar Archivos | -> | 4. Ejecutar Acción |
-|    (Archivo .key)  |    | (Cifrar/Descifrar) |    |   (Llave + Doc)    |    | (Guardar y Avisar) |
-|____________________|    |____________________|    |____________________|    |____________________|
-```
-
----
-
-### 1. Preparación
-
-El botón **"Generar Nuevas Llaves RSA"** abre un `JFileChooser` para guardar el par de llaves.
-
-Ejemplo:
-
-```
-mi_llave_secreta.key
-```
-
----
-
-### 2. Configuración
-
-El usuario selecciona el modo de operación mediante un `RadioButton`:
-
-* **Cifrar Archivo**
-* **Descifrar Archivo**
-
-Esto revela dinámicamente los botones necesarios.
-
----
-
-### 3. Carga de Datos
-
-El usuario carga:
-
-1. La llave (`.key`)
-2. El archivo objetivo (`.txt`, `.bmp`, etc.)
-
----
-
-### 4. Procesamiento
-
-El botón **Ejecutar**:
-
-* lee el archivo en memoria
-* procesa los bloques con RSA
-* abre un diálogo para guardar el resultado
-
-El sistema maneja errores utilizando bloques `try-catch` y los muestra en la interfaz.
-
----
-
-# Estructura del Proyecto
+## Estructura de archivos
 
 ```
 P2 -- Funcion Criptografica/
@@ -259,70 +66,46 @@ P2 -- Funcion Criptografica/
         └── main/
             ├── java/
             │   └── encrypt/
-            │       ├── App.java
-            │       │   Punto de entrada que lanza la GUI
-            │
-            │       ├── Encrypt.java
-            │       │   Lógica RSA: generación, carga de llaves y cifrado/descifrado
-            │
-            │       ├── FileData.java
-            │       │   Manejo de lectura y escritura de archivos a nivel de bytes
-            │
-            │       └── GUI.java
-            │           Interfaz gráfica adaptativa con Swing
-            │
+            │       ├── App.java          ← punto de entrada, lanza la GUI
+            │       ├── Encrypt.java      ← RSA: genera, guarda, carga llaves y cifra/descifra
+            │       ├── FileData.java     ← maneja lectura y escritura de archivos
+            │       └── GUI.java          ← interfaz gráfica (Swing)
             └── resources/
                 ├── BaseTXT/
-                │   └── p.txt
-                │       Archivo de prueba
-                │
-                ├── EncryptTXT/
-                │       Carpeta sugerida para archivos cifrados
-                │
-                ├── DecryptTXT/
-                │       Carpeta sugerida para archivos descifrados
-                │
-                └── keys/
-                        Carpeta sugerida para almacenar llaves .key
+                │   └── p.txt             ← archivo de ejemplo
+                ├── EncryptTXT/           ← carpeta sugerida para resultados cifrados
+                ├── DecryptTXT/           ← carpeta sugerida para resultados descifrados
+                └── keys/                 ← carpeta sugerida para guardar archivos .key
 ```
 
 ---
 
-# Cómo Ejecutar el Proyecto
+## Cómo correrlo
 
-## Requisitos Previos
+### Requisitos
 
-Instalar:
+- Java 21+
+- Maven 3.6+
 
-* **Java 21+**
-* **Maven 3.6+**
-
----
-
-# Compilación
-
-Desde la carpeta del proyecto ejecutar:
+### Compilar
 
 ```bash
 cd encrypt_library
 mvn clean compile
 ```
 
----
-
-# Ejecución
-
-Para iniciar la aplicación y abrir la interfaz gráfica:
+### Ejecutar
 
 ```bash
 mvn exec:java -Dexec.mainClass="encrypt.App"
 ```
 
+O desde la raíz del workspace con VS Code, usando el botón **Run** en `App.java`.
+
 ---
 
-💡 **Nota:**  
-También se puede ejecutar directamente desde el IDE (por ejemplo **NetBeans o IntelliJ**) usando el botón **Run** en el archivo:
+### Resultado esperado
 
-```
-App.java
-```
+Se abre la ventana de la **GUI**.  
+Desde ahí puedes generar un `.key`, seleccionarlo, cargar un archivo y cifrarlo o descifrarlo.  
+El archivo resultante se guarda donde el usuario indique.
