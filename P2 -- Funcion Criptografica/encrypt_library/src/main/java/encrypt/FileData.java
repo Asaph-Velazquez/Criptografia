@@ -17,12 +17,22 @@ public class FileData {
     }
 
     public void write() throws Exception {
-        Files.write(Path.of(this.path), this.data);
+        Path filePath = Path.of(this.path);
+        // Validamos y creamos las carpetas padre si no existen
+        if (filePath.getParent() != null) {
+            Files.createDirectories(filePath.getParent());
+        }
+        Files.write(filePath, this.data);
     }
 
     public void write(byte[] bytes) throws Exception {
         this.data = bytes;
-        Files.write(Path.of(this.path), bytes);
+        Path filePath = Path.of(this.path);
+        // Validamos y creamos las carpetas padre si no existen
+        if (filePath.getParent() != null) {
+            Files.createDirectories(filePath.getParent());
+        }
+        Files.write(filePath, bytes);
     }
 
     public String getPath() {
