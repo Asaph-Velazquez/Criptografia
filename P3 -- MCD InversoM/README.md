@@ -42,7 +42,7 @@ La GUI muestra:
 
 ### Consola
 ```bash
-mvn compile exec:java -Dexec.mainClass="com.mycompany.mcdinversom.MCDInversoM"
+mvn exec:java "-Dexec.mainClass=com.mycompany.mcdinversom.GUI"
 ```
 
 Ingresa los valores cuando se solicite. Muestra todo el procedimiento paso a paso.
