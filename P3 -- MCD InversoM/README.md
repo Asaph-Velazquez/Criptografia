@@ -42,7 +42,7 @@ La GUI muestra:
 
 ### Consola
 ```bash
-mvn exec:java "-Dexec.mainClass=com.mycompany.mcdinversom.GUI"
+mvn exec:java 
 ```
 
 Ingresa los valores cuando se solicite. Muestra todo el procedimiento paso a paso.
@@ -80,10 +80,10 @@ MCDInversoM/
 mvn compile
 
 # Ejecutar GUI
-mvn exec:java -Dexec.mainClass="com.mycompany.mcdinversom.GUI"
+mvn exec:java "-Dexec.mainClass=com.mycompany.mcdinversom.GUI"
 
 # Ejecutar consola
-mvn exec:java -Dexec.mainClass="com.mycompany.mcdinversom.MCDInversoM"
+mvn exec:java "-Dexec.mainClass=com.mycompany.mcdinversom.MCDInversoM"
 ```
 
 ---
