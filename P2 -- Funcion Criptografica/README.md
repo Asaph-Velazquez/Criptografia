@@ -97,7 +97,11 @@ mvn clean compile
 ### Ejecutar
 
 ```bash
-mvn exec:java -Dexec.mainClass="encrypt.App"
+mvn exec:java
+```
+ó 
+```bash
+mvn exec:java "-Dexec.mainClass=encrypt.App"
 ```
 
 O desde la raíz del workspace con VS Code, usando el botón **Run** en `App.java`.
