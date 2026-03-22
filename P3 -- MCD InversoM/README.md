@@ -27,7 +27,7 @@ A partir del MCD = 1, despeja hacia atrás para encontrar los coeficientes de B�
 
 ### Interfaz Gráfica
 ```bash
-mvn compile exec:java -Dexec.mainClass="com.mycompany.mcdinversom.GUI"
+mvn compile exec:java "-Dexec.mainClass=com.mycompany.mcdinversom.GUI"
 ```
 
 Ingresa:
