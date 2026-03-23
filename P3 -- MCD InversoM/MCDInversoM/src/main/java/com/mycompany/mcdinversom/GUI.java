@@ -183,7 +183,8 @@ public class GUI extends JFrame {
             outEstetico.setText(
                 "  INVERSO: α^-1 = " + inv + "\n\n" +
                 "  CIFRADO:\n  C = (" + alfa + "P + " + beta + ") mod " + n + "\n\n" +
-                "  DESCIFRADO:\n  P = " + inv + "(C + " + (n - beta) + ") mod " + n
+                "  DESCIFRADO:\n  P = " + inv + "(C + " + (n - beta) + ") mod " + n  + "\n\n" +
+                "  P = (" + inv + "C + "+ inv*(n - beta) + ") mod " + n  
             );
 
             statusLabel.setText("✅ Cálculos realizados correctamente.");
