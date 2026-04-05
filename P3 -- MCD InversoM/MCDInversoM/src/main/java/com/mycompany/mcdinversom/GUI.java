@@ -179,12 +179,15 @@ public class GUI extends JFrame {
             int tDesc = (inv * -beta) % n;
             if (tDesc < 0) tDesc += n;
 
+            int terminoIndependiente = (inv * (n - beta)) % n;
+            if (terminoIndependiente < 0) terminoIndependiente += n;
+
             outEstetico.setForeground(accentColor);
             outEstetico.setText(
                 "  INVERSO: α^-1 = " + inv + "\n\n" +
                 "  CIFRADO:\n  C = (" + alfa + "P + " + beta + ") mod " + n + "\n\n" +
                 "  DESCIFRADO:\n  P = " + inv + "(C + " + (n - beta) + ") mod " + n  + "\n\n" +
-                "  P = (" + inv + "C + "+ inv*(n - beta) + ") mod " + n  
+                "  P = (" + inv + "C + " + terminoIndependiente + ") mod " + n
             );
 
             statusLabel.setText("✅ Cálculos realizados correctamente.");
