@@ -3,6 +3,7 @@
 *_e_d.bmp
 *_e.txt
 *_e_d.txt
+.expo/
 
 # Maven
 target/
