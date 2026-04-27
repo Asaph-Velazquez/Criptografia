@@ -26,7 +26,7 @@ public class GUI extends JFrame {
     private JButton generateBtn;
     private JRadioButton encryptRB = new JRadioButton("Cifrar Archivo");
     private JRadioButton decryptRB = new JRadioButton("Descifrar Archivo");
-    private JButton keyButton = crearBotonModerno("📁 Subir Llave (.key)", primaryColor, primaryHover);
+    private JButton keyButton = crearBotonModerno("📁 Subir Llave (.pub/.key)", primaryColor, primaryHover);
     private JButton fileButton = crearBotonModerno("📄 Subir Archivo", primaryColor, primaryHover);
     private JButton actionButton = crearBotonModerno("🚀 Ejecutar", accentColor, accentHover);
     private JLabel statusLabel = new JLabel("✨ Listo para empezar...");
@@ -200,10 +200,19 @@ public class GUI extends JFrame {
 
     private void selectKey(ActionEvent e) {
         JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Selecciona tu archivo de Llave (.key)");
+        
+        if (encryptRB.isSelected()) {
+            // CIFRAR: necesita la clave PÚBLICA del destinatario (.pub)
+            chooser.setDialogTitle("Selecciona la CLAVE PÚBLICA del destinatario (.pub)");
+        } else {
+            // DESCIFRAR: usa tu clave PRIVADA (.key)
+            chooser.setDialogTitle("Selecciona tu CLAVE PRIVADA (.key)");
+        }
+        
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             keyPath = chooser.getSelectedFile().getAbsolutePath();
-            statusLabel.setText("🔑 Llave cargada: " + chooser.getSelectedFile().getName());
+            String keyType = encryptRB.isSelected() ? "PÚBLICA" : "PRIVADA";
+            statusLabel.setText("🔑 Clave " + keyType + " cargada: " + chooser.getSelectedFile().getName());
         }
     }
 
@@ -221,15 +230,26 @@ public class GUI extends JFrame {
             statusLabel.setText("⏳ Generando llaves, un momento...");
             Encrypt enc = new Encrypt();
             JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Guardar nueva llave RSA");
-            chooser.setSelectedFile(new File("mi_llave_secreta.key"));
+            chooser.setDialogTitle("Guardar nueva clave privada RSA");
+            chooser.setSelectedFile(new File("mi_clave_privada.key"));
             
             if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-                String path = chooser.getSelectedFile().getAbsolutePath();
-                if (!path.endsWith(".key")) path += ".key";
-                enc.saveKeys(path);
+                String privPath = chooser.getSelectedFile().getAbsolutePath();
+                if (!privPath.endsWith(".key")) privPath += ".key";
+                
+                // Save private key
+                enc.savePrivateKey(privPath);
+                
+                // Save public key in same location with .pub extension
+                String pubPath = privPath.replace(".key", ".pub");
+                enc.savePublicKey(pubPath);
+                
                 statusLabel.setText("✅ Llaves generadas con éxito.");
-                JOptionPane.showMessageDialog(this, "Llaves guardadas correctamente en:\n" + path, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, 
+                    "Claves guardadas correctamente:\n\n" +
+                    "🔒 Clave PRIVADA (NUNCA compartir):\n" + privPath + "\n\n" +
+                    "🔓 Clave PÚBLICA (para que otros te envíen archivos):\n" + pubPath,
+                    "Éxito", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 statusLabel.setText("❌ Generación de llaves cancelada.");
             }
@@ -251,16 +271,22 @@ public class GUI extends JFrame {
 
         try {
             statusLabel.setText("⚙️ Procesando...");
-            Encrypt enc = Encrypt.loadFromFile(keyPath);
             FileData input = new FileData(filePath);
             input.read();
 
             byte[] result;
-            String actionName = encryptRB.isSelected() ? "cifrado" : "descifrado";
-            
+            String actionName;
+            Encrypt enc;
+
             if (encryptRB.isSelected()) {
+                // ENCRIPTAR: usar la clave PÚBLICA del destinatario (.pub)
+                actionName = "cifrado";
+                enc = Encrypt.loadPublicKey(keyPath);
                 result = enc.encrypt(input.getData());
             } else {
+                // DESENCRIPTAR: usar MI clave PRIVADA (.key)
+                actionName = "descifrado";
+                enc = Encrypt.loadPrivateKey(keyPath);
                 result = enc.decrypt(input.getData());
             }
 
@@ -293,7 +319,7 @@ public class GUI extends JFrame {
             }
         } catch (Exception ex) {
             statusLabel.setText("❌ Error en el proceso.");
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage() + "\n¿Seguro que subiste la llave correcta?", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage() + "\n\nRecordá:\n• Para CIFRAR usá archivo .pub (clave pública)\n• Para DESCIFRAR usá archivo .key (clave privada)", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
