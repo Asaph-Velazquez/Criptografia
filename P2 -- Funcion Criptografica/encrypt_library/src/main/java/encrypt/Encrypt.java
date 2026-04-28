@@ -71,7 +71,7 @@ public class Encrypt {
         }
     }
 
-    // Load both keys from a single .key file (LEGACY)
+    // Load both keys from a single .key file 
     public static Encrypt loadFromFile(String path) throws Exception {
         try (DataInputStream dis = new DataInputStream(new FileInputStream(path))) {
             int privLen = dis.readInt();
