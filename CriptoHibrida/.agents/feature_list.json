@@ -78,14 +78,14 @@
       "title": "Implementar firmado, parseo PEM de llaves cargadas y verificacion RSA con SHA-256",
       "description": "Servicio Java para parsear llaves RSA existentes en formato PEM desde arreglos byte[] o archivos cargados (llave privada local para emision y llave publica descargada de la web para verificacion), calculo de resumen SHA-256 sobre flujos m y firmado/verificacion digital con java.security.Signature.",
       "allowed_paths": [
-        "src/main/java/com/ipn/escom/crypto/service/RsaSignerService.java",
-        "src/main/java/com/ipn/escom/crypto/util/PemUtils.java",
-        "src/test/java/com/ipn/escom/crypto/RsaSignerServiceTest.java"
+        "src/main/java/com/cripto/CriptoHibrida/crypto/service/RsaSignerService.java",
+        "src/main/java/com/cripto/CriptoHibrida/crypto/util/PemUtils.java",
+        "src/test/java/com/cripto/CriptoHibrida/crypto/RsaSignerServiceTest.java"
       ],
       "forbidden_paths": [
-        "src/main/java/com/ipn/escom/crypto/service/DiffieHellmanService.java",
-        "src/main/java/com/ipn/escom/crypto/service/AesCipherService.java",
-        "src/main/java/com/ipn/escom/crypto/controller/"
+        "src/main/java/com/cripto/CriptoHibrida/crypto/service/DiffieHellmanService.java",
+        "src/main/java/com/cripto/CriptoHibrida/crypto/service/AesCipherService.java",
+        "src/main/java/com/cripto/CriptoHibrida/crypto/controller/"
       ],
       "deliverables": [
         "Utilidad PemUtils para convertir contenido PEM de archivos cargados a PrivateKey (PKCS#8) y PublicKey (X.509)",
@@ -96,7 +96,7 @@
       "verification": [
         "./mvnw test -Dtest=RsaSignerServiceTest"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": 4,
@@ -105,13 +105,13 @@
       "title": "Implementar empaquetado, serializacion JSON y manejo binario",
       "description": "Componente para estructurar el paquete contenedor JSON con Jackson, manejando conversiones Base64 de ciphertext y firma, y extrayendo metadatos como remitente y nombre original.",
       "allowed_paths": [
-        "src/main/java/com/ipn/escom/crypto/model/EncryptedPackage.java",
-        "src/main/java/com/ipn/escom/crypto/service/PackageManagerService.java",
-        "src/test/java/com/ipn/escom/crypto/PackageManagerServiceTest.java"
+        "src/main/java/com/cripto/CriptoHibrida/crypto/model/EncryptedPackage.java",
+        "src/main/java/com/cripto/CriptoHibrida/crypto/service/PackageManagerService.java",
+        "src/test/java/com/cripto/CriptoHibrida/crypto/PackageManagerServiceTest.java"
       ],
       "forbidden_paths": [
-        "src/main/java/com/ipn/escom/crypto/service/DiffieHellmanService.java",
-        "src/main/java/com/ipn/escom/crypto/controller/"
+        "src/main/java/com/cripto/CriptoHibrida/crypto/service/DiffieHellmanService.java",
+        "src/main/java/com/cripto/CriptoHibrida/crypto/controller/"
       ],
       "deliverables": [
         "DTO estructurado con remitente, nombre_archivo, dh_public_k, dh_public_iv, ciphertext y firma",
@@ -121,7 +121,7 @@
       "verification": [
         "./mvnw test -Dtest=PackageManagerServiceTest"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": 5,
@@ -130,13 +130,13 @@
       "title": "Implementar orquestador integral de Criptografia Hibrida (Esquema 2)",
       "description": "Servicio coordinador que integra DH, AES, RSA y empaquetado, soportando seleccion de procesos independientes (Cifrar, Firmar, Descifrar, Verificar con archivo de llave publica cargado, o combinados).",
       "allowed_paths": [
-        "src/main/java/com/ipn/escom/crypto/service/HybridCryptoOrchestrator.java",
-        "src/main/java/com/ipn/escom/crypto/model/ProcessOptions.java",
-        "src/main/java/com/ipn/escom/crypto/model/VerificationResult.java",
-        "src/test/java/com/ipn/escom/crypto/HybridCryptoOrchestratorTest.java"
+        "src/main/java/com/cripto/CriptoHibrida/crypto/service/HybridCryptoOrchestrator.java",
+        "src/main/java/com/cripto/CriptoHibrida/crypto/model/ProcessOptions.java",
+        "src/main/java/com/cripto/CriptoHibrida/crypto/model/VerificationResult.java",
+        "src/test/java/com/cripto/CriptoHibrida/crypto/HybridCryptoOrchestratorTest.java"
       ],
       "forbidden_paths": [
-        "src/main/java/com/ipn/escom/crypto/controller/"
+        "src/main/java/com/cripto/CriptoHibrida/crypto/controller/"
       ],
       "deliverables": [
         "Metodo de emision que recibe archivo binario y opciones de proceso, retornando el paquete JSON",
@@ -146,7 +146,7 @@
       "verification": [
         "./mvnw test -Dtest=HybridCryptoOrchestratorTest"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": 6,
@@ -155,13 +155,13 @@
       "title": "Exponer endpoints REST para carga multipart, procesamiento y descarga de archivos",
       "description": "Controladores REST para recibir archivos binarios por multipart/form-data (incluyendo carga del paquete JSON y archivo de llave publica descargada de la web), procesar emision/recepcion y retornar resultados.",
       "allowed_paths": [
-        "src/main/java/com/ipn/escom/crypto/controller/CryptoProcessController.java",
-        "src/main/java/com/ipn/escom/crypto/dto/",
-        "src/test/java/com/ipn/escom/crypto/CryptoProcessControllerTest.java"
+        "src/main/java/com/cripto/CriptoHibrida/crypto/controller/CryptoProcessController.java",
+        "src/main/java/com/cripto/CriptoHibrida/crypto/dto/",
+        "src/test/java/com/cripto/CriptoHibrida/crypto/CryptoProcessControllerTest.java"
       ],
       "forbidden_paths": [
-        "src/main/java/com/ipn/escom/crypto/service/AesCipherService.java",
-        "src/main/java/com/ipn/escom/crypto/service/DiffieHellmanService.java"
+        "src/main/java/com/cripto/CriptoHibrida/crypto/service/AesCipherService.java",
+        "src/main/java/com/cripto/CriptoHibrida/crypto/service/DiffieHellmanService.java"
       ],
       "deliverables": [
         "Endpoint POST /api/crypto/process para recibir archivo binario, flags de servicio y parametros DH, retornando JSON empaquetado",
@@ -173,7 +173,7 @@
         "./mvnw test -Dtest=CryptoProcessControllerTest",
         "./mvnw clean compile"
       ],
-      "status": "pending"
+      "status": "done"
     }
   ]
 }
