@@ -1,6 +1,6 @@
 {
   "project": "CriptografiaHibrida",
-  "description": "Backlog de ejecucion tecnica para el backend Java con Spring Boot del Esquema 2 de Criptografia Hibrida (Diffie-Hellman, AES-CBC, RSA, SHA-256, empaquetado JSON y descarga de llaves por red).",
+  "description": "Backlog de ejecucion tecnica para el backend Java con Spring Boot del Esquema 2 de Criptografia Hibrida (Diffie-Hellman, AES-CBC, RSA, SHA-256, empaquetado JSON y carga de llaves descargadas previamente por el usuario).",
   "rules": {
     "one_feature_at_a_time": true,
     "require_verification_to_close": true,
@@ -44,7 +44,7 @@
       "verification": [
         "./mvnw test -Dtest=DiffieHellmanServiceTest"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": 2,
@@ -69,14 +69,14 @@
       "verification": [
         "./mvnw test -Dtest=AesCipherServiceTest"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": 3,
       "name": "rsa_sha256_signature_service",
       "module": "crypto-service",
-      "title": "Implementar generacion de llaves RSA, hashing SHA-256 y firmado/verificacion",
-      "description": "Servicio Java para generar pares de llaves RSA de 2048 bits, exportar/importar formato PEM, calcular hash SHA-256 sobre byte[] y ejecutar firmado y verificacion digital con java.security.Signature.",
+      "title": "Implementar firmado, parseo PEM de llaves cargadas y verificacion RSA con SHA-256",
+      "description": "Servicio Java para parsear llaves RSA existentes en formato PEM desde arreglos byte[] o archivos cargados (llave privada local para emision y llave publica descargada de la web para verificacion), calculo de resumen SHA-256 sobre flujos m y firmado/verificacion digital con java.security.Signature.",
       "allowed_paths": [
         "src/main/java/com/ipn/escom/crypto/service/RsaSignerService.java",
         "src/main/java/com/ipn/escom/crypto/util/PemUtils.java",
@@ -88,9 +88,10 @@
         "src/main/java/com/ipn/escom/crypto/controller/"
       ],
       "deliverables": [
-        "Generacion y parseo de llaves publica/privada en formato PEM (PKCS#8 y X.509)",
-        "Calculo de hash SHA-256 sobre arreglos de bytes y firmado con clave privada",
-        "Metodo booleano de verificacion que retorne false de inmediato ante modificaciones de la firma o del mensaje"
+        "Utilidad PemUtils para convertir contenido PEM de archivos cargados a PrivateKey (PKCS#8) y PublicKey (X.509)",
+        "Calculo de hash SHA-256 sobre arreglos de bytes en claro del archivo original m",
+        "Firmado digital con clave privada local usando SHA256withRSA",
+        "Metodo booleano de verificacion contra la PublicKey cargada que retorne false de forma estricta ante manipulacion de firma o datos"
       ],
       "verification": [
         "./mvnw test -Dtest=RsaSignerServiceTest"
@@ -124,34 +125,10 @@
     },
     {
       "id": 5,
-      "name": "remote_public_key_client",
-      "module": "storage-engine",
-      "title": "Implementar cliente HTTP para descarga en vivo de llaves publicas",
-      "description": "Servicio de cliente HTTP (usando RestClient o WebClient) para descargar llaves publicas PEM desde URLs publicas en servidores web durante el proceso de verificacion.",
-      "allowed_paths": [
-        "src/main/java/com/ipn/escom/crypto/service/KeyDownloaderService.java",
-        "src/test/java/com/ipn/escom/crypto/KeyDownloaderServiceTest.java"
-      ],
-      "forbidden_paths": [
-        "src/main/java/com/ipn/escom/crypto/service/AesCipherService.java",
-        "src/main/java/com/ipn/escom/crypto/controller/"
-      ],
-      "deliverables": [
-        "Descarga en vivo de archivos .pub o .pem a partir de una URL valida",
-        "Manejo de excepciones por timeouts, errores HTTP 4xx/5xx y contenido PEM corrupto",
-        "Entrega directa de la clave publica parseada al servicio de verificacion"
-      ],
-      "verification": [
-        "./mvnw test -Dtest=KeyDownloaderServiceTest"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": 6,
       "name": "crypto_orchestration_service",
       "module": "orchestration",
       "title": "Implementar orquestador integral de Criptografia Hibrida (Esquema 2)",
-      "description": "Servicio coordinador que integra DH, AES, RSA y empaquetado, soportando seleccion de procesos independientes (Cifrar, Firmar, Descifrar, Verificar, o combinados).",
+      "description": "Servicio coordinador que integra DH, AES, RSA y empaquetado, soportando seleccion de procesos independientes (Cifrar, Firmar, Descifrar, Verificar con archivo de llave publica cargado, o combinados).",
       "allowed_paths": [
         "src/main/java/com/ipn/escom/crypto/service/HybridCryptoOrchestrator.java",
         "src/main/java/com/ipn/escom/crypto/model/ProcessOptions.java",
@@ -163,7 +140,7 @@
       ],
       "deliverables": [
         "Metodo de emision que recibe archivo binario y opciones de proceso, retornando el paquete JSON",
-        "Metodo de recepcion que procesa el JSON, descifra, verifica la firma contra la llave descargada y reporta el estatus de integridad",
+        "Metodo de recepcion que procesa el JSON, descifra, verifica la firma contra el archivo de llave publica cargado y reporta el estatus de integridad",
         "Soporte para ejecucion selectiva: 'uno de dos o dos de dos' procesos criptograficos"
       ],
       "verification": [
@@ -172,14 +149,13 @@
       "status": "pending"
     },
     {
-      "id": 7,
+      "id": 6,
       "name": "rest_api_endpoints_contract",
       "module": "api-controller",
       "title": "Exponer endpoints REST para carga multipart, procesamiento y descarga de archivos",
-      "description": "Controladores REST para recibir archivos binarios por multipart/form-data, procesar emision/recepcion y descargar el paquete JSON o el archivo recuperado.",
+      "description": "Controladores REST para recibir archivos binarios por multipart/form-data (incluyendo carga del paquete JSON y archivo de llave publica descargada de la web), procesar emision/recepcion y retornar resultados.",
       "allowed_paths": [
         "src/main/java/com/ipn/escom/crypto/controller/CryptoProcessController.java",
-        "src/main/java/com/ipn/escom/crypto/controller/KeyManagementController.java",
         "src/main/java/com/ipn/escom/crypto/dto/",
         "src/test/java/com/ipn/escom/crypto/CryptoProcessControllerTest.java"
       ],
@@ -189,7 +165,7 @@
       ],
       "deliverables": [
         "Endpoint POST /api/crypto/process para recibir archivo binario, flags de servicio y parametros DH, retornando JSON empaquetado",
-        "Endpoint POST /api/crypto/verify-decrypt para recibir paquete JSON y URL de llave publica, retornando estatus de integridad y archivo recuperado",
+        "Endpoint POST /api/crypto/verify-decrypt recibiendo como multipart el JSON y el archivo de llave publica, retornando estatus de integridad y archivo recuperado",
         "CORS configurado para permitir conexion transparente con el frontend que se elija posteriormente",
         "Respuestas HTTP claras ante violacion de integridad o firmas no coincidentes"
       ],
