@@ -33,64 +33,36 @@
   "features": [
     {
       "id": 1,
-      "name": "web_frontend_requests_dashboard",
-      "module": "ASL-Web",
-      "title": "Fortalecer el comportamiento del dashboard de solicitudes",
-      "description": "Cambios limitados a flujos React/Vite del dashboard, como listado de solicitudes, acciones del operador, interacciones de modales y estado local de interfaz.",
+      "name": "dh_key_exchange_service",
+      "module": "crypto-service",
+      "title": "Implementar doble acuerdo Diffie-Hellman",
+      "description": "BigInteger y SecureRandom para acuerdos independientes de clave AES e IV; SHA-256 deriva 32 y 16 bytes respectivamente.",
       "allowed_paths": [
-        "ASL-Web/src/App.tsx",
-        "ASL-Web/src/components/",
-        "ASL-Web/src/hooks/",
-        "ASL-Web/src/index.css",
-        "ASL-Web/src/utils/"
+        "src/main/java/com/cripto/CriptoHibrida/crypto/model/DhParameters.java",
+        "src/main/java/com/cripto/CriptoHibrida/crypto/service/DiffieHellmanService.java",
+        "src/test/java/com/cripto/CriptoHibrida/crypto/DiffieHellmanServiceTest.java",
+        ".agents/feature_list.json"
       ],
-      "forbidden_paths": [
-        "ASL-Web/server/",
-        "ASL-MobileAPP/",
-        "ASL-CallAPP/",
-        "ASL-IA/"
-      ],
-      "deliverables": [
-        "El comportamiento de la interfaz se actualiza sin romper la navegacion existente",
-        "El estado y las props se mantienen consistentes entre los componentes afectados",
-        "No quedan errores de TypeScript ni de compilacion"
-      ],
-      "verification": [
-        "cd ASL-Web && npm run lint",
-        "cd ASL-Web && npm run build"
-      ],
-      "status": "pending"
+      "forbidden_paths": ["src/main/java/com/cripto/CriptoHibrida/crypto/controller/", "src/main/java/com/cripto/CriptoHibrida/crypto/service/RsaSignerService.java"],
+      "deliverables": ["Ambos participantes obtienen los mismos secretos mediante publicas cruzadas", "SHA-256 sobre BigInteger.toByteArray deriva clave de 32 bytes e IV de primeros 16 bytes"],
+      "verification": ["./mvnw test -Dtest=DiffieHellmanServiceTest"],
+      "status": "done"
     },
     {
       "id": 2,
-      "name": "web_server_operations_api",
-      "module": "ASL-Web/server",
-      "title": "Estabilizar la API operativa y el backend websocket",
-      "description": "Cambios limitados a rutas Express, middleware, modelos, servicios y persistencia operativa del backend web del hotel.",
+      "name": "aes_cbc_byte_stream_service",
+      "module": "crypto-service",
+      "title": "Implementar AES-CBC sobre bytes binarios",
+      "description": "Cifrar y descifrar byte[] con AES/CBC/PKCS5Padding, clave de 32 bytes e IV de 16 bytes.",
       "allowed_paths": [
-        "ASL-Web/server/index.js",
-        "ASL-Web/server/routes/",
-        "ASL-Web/server/models/",
-        "ASL-Web/server/services/",
-        "ASL-Web/server/middleware/",
-        "ASL-Web/server/utils/",
-        "ASL-Web/server/scripts/"
+        "src/main/java/com/cripto/CriptoHibrida/crypto/service/AesCipherService.java",
+        "src/test/java/com/cripto/CriptoHibrida/crypto/AesCipherServiceTest.java",
+        ".agents/feature_list.json"
       ],
-      "forbidden_paths": [
-        "ASL-Web/src/",
-        "ASL-MobileAPP/",
-        "ASL-CallAPP/",
-        "ASL-IA/"
-      ],
-      "deliverables": [
-        "El comportamiento HTTP y websocket se mantiene consistente internamente",
-        "Cualquier cambio de payload queda documentado y reflejado en sus consumidores antes del cierre",
-        "No quedan imports rotos, supuestos faltantes de entorno ni desajustes de modelos"
-      ],
-      "verification": [
-        "cd ASL-Web/server && npm start o npm run dev para validacion de humo"
-      ],
-      "status": "pending"
+      "forbidden_paths": ["src/main/java/com/cripto/CriptoHibrida/crypto/controller/", "src/main/java/com/cripto/CriptoHibrida/crypto/service/RsaSignerService.java"],
+      "deliverables": ["Recuperacion exacta de archivos binarios en ambas direcciones", "Pruebas de clave e IV incorrectos respetando las limitaciones de CBC sin autenticacion"],
+      "verification": ["./mvnw test -Dtest=AesCipherServiceTest"],
+      "status": "done"
     },
     {
       "id": 3,
