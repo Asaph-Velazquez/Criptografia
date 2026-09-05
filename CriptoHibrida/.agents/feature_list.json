@@ -1,6 +1,6 @@
 {
-  "project": "ASL-System",
-  "description": "Backlog estricto de ejecucion para el monorepo ASL-System. Cada feature debe respetar el limite de su modulo y solo puede cerrarse con verificacion explicita.",
+  "project": "CriptografiaHibrida",
+  "description": "Backlog de ejecucion tecnica para el backend Java con Spring Boot del Esquema 2 de Criptografia Hibrida (Diffie-Hellman, AES-CBC, RSA, SHA-256, empaquetado JSON y descarga de llaves por red).",
   "rules": {
     "one_feature_at_a_time": true,
     "require_verification_to_close": true,
@@ -9,25 +9,14 @@
     "valid_status": ["pending", "in_progress", "done", "blocked"]
   },
   "verification_profile": {
-    "ASL-Web": [
-      "npm run lint",
-      "npm run build"
+    "backend_build": [
+      "./mvnw clean compile"
     ],
-    "ASL-Web/server": [
-      "npm start o npm run dev para validacion de humo"
+    "backend_unit_tests": [
+      "./mvnw test"
     ],
-    "ASL-MobileAPP": [
-      "npm run lint",
-      "npm run typecheck"
-    ],
-    "ASL-CallAPP/app": [
-      "npm run build"
-    ],
-    "ASL-CallAPP/server": [
-      "npm start o npm run dev para validacion de humo"
-    ],
-    "ASL-IA": [
-      "python -m py_compile <archivo-editado>.py"
+    "backend_smoke": [
+      "./mvnw spring-boot:run"
     ]
   },
   "features": [
@@ -35,602 +24,180 @@
       "id": 1,
       "name": "dh_key_exchange_service",
       "module": "crypto-service",
-      "title": "Implementar doble acuerdo Diffie-Hellman",
-      "description": "BigInteger y SecureRandom para acuerdos independientes de clave AES e IV; SHA-256 deriva 32 y 16 bytes respectivamente.",
+      "title": "Implementar matematicas y derivacion de llaves Diffie-Hellman",
+      "description": "Servicio en Java para calcular exponentes efimeros a, b, c, d y llaves publicas Ka, Kb, Kc, Kd usando BigInteger y modulo n, derivando con SHA-256 la clave simetrica de 256 bits y el IV de 16 bytes.",
       "allowed_paths": [
-        "src/main/java/com/cripto/CriptoHibrida/crypto/model/DhParameters.java",
-        "src/main/java/com/cripto/CriptoHibrida/crypto/service/DiffieHellmanService.java",
-        "src/test/java/com/cripto/CriptoHibrida/crypto/DiffieHellmanServiceTest.java",
-        ".agents/feature_list.json"
+        "src/main/java/com/ipn/escom/crypto/service/DiffieHellmanService.java",
+        "src/main/java/com/ipn/escom/crypto/model/DhParameters.java",
+        "src/test/java/com/ipn/escom/crypto/DiffieHellmanServiceTest.java"
       ],
-      "forbidden_paths": ["src/main/java/com/cripto/CriptoHibrida/crypto/controller/", "src/main/java/com/cripto/CriptoHibrida/crypto/service/RsaSignerService.java"],
-      "deliverables": ["Ambos participantes obtienen los mismos secretos mediante publicas cruzadas", "SHA-256 sobre BigInteger.toByteArray deriva clave de 32 bytes e IV de primeros 16 bytes"],
-      "verification": ["./mvnw test -Dtest=DiffieHellmanServiceTest"],
-      "status": "done"
+      "forbidden_paths": [
+        "src/main/java/com/ipn/escom/crypto/service/AesCipherService.java",
+        "src/main/java/com/ipn/escom/crypto/service/RsaSignerService.java",
+        "src/main/java/com/ipn/escom/crypto/controller/"
+      ],
+      "deliverables": [
+        "Calculo correcto y determinista del secreto compartido K e IV_secret entre emisor y receptor",
+        "Derivacion estricta de 32 bytes para clave AES y 16 bytes para el vector de inicializacion",
+        "Soporte configurable para g y n con validacion de no nulidad y primalidad"
+      ],
+      "verification": [
+        "./mvnw test -Dtest=DiffieHellmanServiceTest"
+      ],
+      "status": "pending"
     },
     {
       "id": 2,
       "name": "aes_cbc_byte_stream_service",
       "module": "crypto-service",
-      "title": "Implementar AES-CBC sobre bytes binarios",
-      "description": "Cifrar y descifrar byte[] con AES/CBC/PKCS5Padding, clave de 32 bytes e IV de 16 bytes.",
+      "title": "Implementar cifrado y descifrado AES-CBC sobre flujos de bytes",
+      "description": "Servicio Java (usando javax.crypto.Cipher) para cifrar y descifrar arreglos binarios (byte[]) en modo AES/CBC/PKCS5Padding con clave e IV derivados de DH.",
       "allowed_paths": [
-        "src/main/java/com/cripto/CriptoHibrida/crypto/service/AesCipherService.java",
-        "src/test/java/com/cripto/CriptoHibrida/crypto/AesCipherServiceTest.java",
-        ".agents/feature_list.json"
+        "src/main/java/com/ipn/escom/crypto/service/AesCipherService.java",
+        "src/test/java/com/ipn/escom/crypto/AesCipherServiceTest.java"
       ],
-      "forbidden_paths": ["src/main/java/com/cripto/CriptoHibrida/crypto/controller/", "src/main/java/com/cripto/CriptoHibrida/crypto/service/RsaSignerService.java"],
-      "deliverables": ["Recuperacion exacta de archivos binarios en ambas direcciones", "Pruebas de clave e IV incorrectos respetando las limitaciones de CBC sin autenticacion"],
-      "verification": ["./mvnw test -Dtest=AesCipherServiceTest"],
-      "status": "done"
+      "forbidden_paths": [
+        "src/main/java/com/ipn/escom/crypto/service/DiffieHellmanService.java",
+        "src/main/java/com/ipn/escom/crypto/service/RsaSignerService.java",
+        "src/main/java/com/ipn/escom/crypto/controller/"
+      ],
+      "deliverables": [
+        "Cifrado y descifrado exacto sobre byte[] para soportar archivos de cualquier tipo (txt, mp3, mp4)",
+        "Manejo correcto de excepciones por clave o padding invalido sin alterar bytes originales",
+        "Uso estricto del IV de 16 bytes provisto por el modulo DH"
+      ],
+      "verification": [
+        "./mvnw test -Dtest=AesCipherServiceTest"
+      ],
+      "status": "pending"
     },
     {
       "id": 3,
-      "name": "mobile_text_flow",
-      "module": "ASL-MobileAPP",
-      "title": "Mejorar el flujo de comunicacion por texto del huesped",
-      "description": "Cambios limitados al recorrido de modo texto: navegacion, formularios de peticion, vistas de historial y componentes o servicios relacionados.",
+      "name": "rsa_sha256_signature_service",
+      "module": "crypto-service",
+      "title": "Implementar generacion de llaves RSA, hashing SHA-256 y firmado/verificacion",
+      "description": "Servicio Java para generar pares de llaves RSA de 2048 bits, exportar/importar formato PEM, calcular hash SHA-256 sobre byte[] y ejecutar firmado y verificacion digital con java.security.Signature.",
       "allowed_paths": [
-        "ASL-MobileAPP/app/Text/",
-        "ASL-MobileAPP/components/TextComponents/",
-        "ASL-MobileAPP/components/BothComponents/",
-        "ASL-MobileAPP/services/",
-        "ASL-MobileAPP/hooks/",
-        "ASL-MobileAPP/constants/",
-        "ASL-MobileAPP/styles/"
+        "src/main/java/com/ipn/escom/crypto/service/RsaSignerService.java",
+        "src/main/java/com/ipn/escom/crypto/util/PemUtils.java",
+        "src/test/java/com/ipn/escom/crypto/RsaSignerServiceTest.java"
       ],
       "forbidden_paths": [
-        "ASL-MobileAPP/app/ASL/",
-        "ASL-Web/",
-        "ASL-CallAPP/",
-        "ASL-IA/"
+        "src/main/java/com/ipn/escom/crypto/service/DiffieHellmanService.java",
+        "src/main/java/com/ipn/escom/crypto/service/AesCipherService.java",
+        "src/main/java/com/ipn/escom/crypto/controller/"
       ],
       "deliverables": [
-        "Las pantallas de modo texto siguen navegables a traves de Expo Router",
-        "Las llamadas de servicio mantienen compatibilidad con los contratos del backend",
-        "Los componentes compartidos no generan regresiones involuntarias en modo ASL"
+        "Generacion y parseo de llaves publica/privada en formato PEM (PKCS#8 y X.509)",
+        "Calculo de hash SHA-256 sobre arreglos de bytes y firmado con clave privada",
+        "Metodo booleano de verificacion que retorne false de inmediato ante modificaciones de la firma o del mensaje"
       ],
       "verification": [
-        "cd ASL-MobileAPP && npm run lint",
-        "cd ASL-MobileAPP && npm run typecheck"
+        "./mvnw test -Dtest=RsaSignerServiceTest"
       ],
       "status": "pending"
     },
     {
       "id": 4,
-      "name": "mobile_asl_flow",
-      "module": "ASL-MobileAPP",
-      "title": "Mejorar el flujo de comunicacion ASL del huesped",
-      "description": "Cambios limitados a pantallas de modo ASL, interacciones de solicitudes ASL, manejo de medios y codigo compartido de soporte.",
+      "name": "package_manager_io_service",
+      "module": "storage-engine",
+      "title": "Implementar empaquetado, serializacion JSON y manejo binario",
+      "description": "Componente para estructurar el paquete contenedor JSON con Jackson, manejando conversiones Base64 de ciphertext y firma, y extrayendo metadatos como remitente y nombre original.",
       "allowed_paths": [
-        "ASL-MobileAPP/app/ASL/",
-        "ASL-MobileAPP/components/ASLComponents/",
-        "ASL-MobileAPP/components/BothComponents/",
-        "ASL-MobileAPP/services/",
-        "ASL-MobileAPP/hooks/",
-        "ASL-MobileAPP/constants/",
-        "ASL-MobileAPP/styles/"
+        "src/main/java/com/ipn/escom/crypto/model/EncryptedPackage.java",
+        "src/main/java/com/ipn/escom/crypto/service/PackageManagerService.java",
+        "src/test/java/com/ipn/escom/crypto/PackageManagerServiceTest.java"
       ],
       "forbidden_paths": [
-        "ASL-MobileAPP/app/Text/",
-        "ASL-Web/",
-        "ASL-CallAPP/",
-        "ASL-IA/"
+        "src/main/java/com/ipn/escom/crypto/service/DiffieHellmanService.java",
+        "src/main/java/com/ipn/escom/crypto/controller/"
       ],
       "deliverables": [
-        "Las pantallas de modo ASL siguen navegables y consistentes internamente",
-        "Cualquier cambio en componentes compartidos se valida contra los flujos ASL y Text",
-        "No quedan regresiones de tipos ni de rutas"
+        "DTO estructurado con remitente, nombre_archivo, dh_public_k, dh_public_iv, ciphertext y firma",
+        "Serializacion limpia a archivo JSON y deserializacion segura desde archivo cargado",
+        "Codificacion y decodificacion robusta a Base64 sin perdida ni corrupcion de bytes"
       ],
       "verification": [
-        "cd ASL-MobileAPP && npm run lint",
-        "cd ASL-MobileAPP && npm run typecheck"
+        "./mvnw test -Dtest=PackageManagerServiceTest"
       ],
       "status": "pending"
     },
     {
       "id": 5,
-      "name": "callapp_interpreter_console",
-      "module": "ASL-CallAPP/app",
-      "title": "Estabilizar el comportamiento de la consola del interprete",
-      "description": "Cambios limitados a la consola web del interprete, incluyendo login, cambios de disponibilidad, manejo de llamadas y UX de captura de reportes.",
+      "name": "remote_public_key_client",
+      "module": "storage-engine",
+      "title": "Implementar cliente HTTP para descarga en vivo de llaves publicas",
+      "description": "Servicio de cliente HTTP (usando RestClient o WebClient) para descargar llaves publicas PEM desde URLs publicas en servidores web durante el proceso de verificacion.",
       "allowed_paths": [
-        "ASL-CallAPP/app/src/",
-        "ASL-CallAPP/app/index.html",
-        "ASL-CallAPP/app/package.json",
-        "ASL-CallAPP/app/vite.config.ts",
-        "ASL-CallAPP/app/tsconfig.json"
+        "src/main/java/com/ipn/escom/crypto/service/KeyDownloaderService.java",
+        "src/test/java/com/ipn/escom/crypto/KeyDownloaderServiceTest.java"
       ],
       "forbidden_paths": [
-        "ASL-CallAPP/server/",
-        "ASL-Web/",
-        "ASL-MobileAPP/",
-        "ASL-IA/"
+        "src/main/java/com/ipn/escom/crypto/service/AesCipherService.java",
+        "src/main/java/com/ipn/escom/crypto/controller/"
       ],
       "deliverables": [
-        "La consola compila correctamente",
-        "Los estados visibles de llamada se mantienen coherentes para el usuario",
-        "No quedan supuestos del frontend que contradigan los payloads del servidor"
+        "Descarga en vivo de archivos .pub o .pem a partir de una URL valida",
+        "Manejo de excepciones por timeouts, errores HTTP 4xx/5xx y contenido PEM corrupto",
+        "Entrega directa de la clave publica parseada al servicio de verificacion"
       ],
       "verification": [
-        "cd ASL-CallAPP/app && npm run build"
+        "./mvnw test -Dtest=KeyDownloaderServiceTest"
       ],
       "status": "pending"
     },
     {
       "id": 6,
-      "name": "callapp_realtime_server",
-      "module": "ASL-CallAPP/server",
-      "title": "Estabilizar el comportamiento del servidor de llamadas en tiempo real",
-      "description": "Cambios limitados a endpoints Express, senalizacion websocket, presencia de interpretes, persistencia de sesiones/estados y reenvio de reportes, incluyendo la infraestructura local para una base NoSQL dedicada con volumen persistente.",
+      "name": "crypto_orchestration_service",
+      "module": "orchestration",
+      "title": "Implementar orquestador integral de Criptografia Hibrida (Esquema 2)",
+      "description": "Servicio coordinador que integra DH, AES, RSA y empaquetado, soportando seleccion de procesos independientes (Cifrar, Firmar, Descifrar, Verificar, o combinados).",
       "allowed_paths": [
-        "ASL-CallAPP/server/index.js",
-        "ASL-CallAPP/server/models/",
-        "ASL-CallAPP/server/package.json",
-        "ASL-CallAPP/server/package-lock.json",
-        "ASL-CallAPP/server/.env.example",
-        "ASL-CallAPP/server/Dockerfile",
-        "ASL-CallAPP/server/compose.yaml",
-        "ASL-CallAPP/server/docker-compose.yml",
-        "ASL-CallAPP/server/.dockerignore"
+        "src/main/java/com/ipn/escom/crypto/service/HybridCryptoOrchestrator.java",
+        "src/main/java/com/ipn/escom/crypto/model/ProcessOptions.java",
+        "src/main/java/com/ipn/escom/crypto/model/VerificationResult.java",
+        "src/test/java/com/ipn/escom/crypto/HybridCryptoOrchestratorTest.java"
       ],
       "forbidden_paths": [
-        "ASL-CallAPP/app/",
-        "ASL-Web/src/",
-        "ASL-MobileAPP/",
-        "ASL-IA/"
+        "src/main/java/com/ipn/escom/crypto/controller/"
       ],
       "deliverables": [
-        "El ciclo de vida de la llamada se mantiene coherente desde el login hasta el envio del reporte",
-        "La persistencia NoSQL del servidor de llamadas queda separada y puede levantarse con un volumen dedicado para conservar estados entre reinicios",
-        "El reenvio de reportes a ASL-Web sigue siendo explicito y compatible",
-        "No quedan rutas rotas de autenticacion, eventos websocket, variables de entorno ni persistencia"
+        "Metodo de emision que recibe archivo binario y opciones de proceso, retornando el paquete JSON",
+        "Metodo de recepcion que procesa el JSON, descifra, verifica la firma contra la llave descargada y reporta el estatus de integridad",
+        "Soporte para ejecucion selectiva: 'uno de dos o dos de dos' procesos criptograficos"
       ],
       "verification": [
-        "cd ASL-CallAPP/server && npm start o npm run dev para validacion de humo"
+        "./mvnw test -Dtest=HybridCryptoOrchestratorTest"
       ],
       "status": "pending"
     },
     {
       "id": 7,
-      "name": "ia_feature_extraction",
-      "module": "ASL-IA",
-      "title": "Refinar el pipeline de extraccion de landmarks y features",
-      "description": "Cambios limitados a scripts Python que derivan landmarks, normalizan datos de mano o construyen artefactos de features a partir del dataset.",
+      "name": "rest_api_endpoints_contract",
+      "module": "api-controller",
+      "title": "Exponer endpoints REST para carga multipart, procesamiento y descarga de archivos",
+      "description": "Controladores REST para recibir archivos binarios por multipart/form-data, procesar emision/recepcion y descargar el paquete JSON o el archivo recuperado.",
       "allowed_paths": [
-        "ASL-IA/src/hand_vectorizer.py",
-        "ASL-IA/src/hand_vectorizer_final.py",
-        "ASL-IA/src/add_new_dataset.py",
-        "ASL-IA/src/requirements.txt",
-        "ASL-IA/README.md"
+        "src/main/java/com/ipn/escom/crypto/controller/CryptoProcessController.java",
+        "src/main/java/com/ipn/escom/crypto/controller/KeyManagementController.java",
+        "src/main/java/com/ipn/escom/crypto/dto/",
+        "src/test/java/com/ipn/escom/crypto/CryptoProcessControllerTest.java"
       ],
       "forbidden_paths": [
-        "ASL-Web/",
-        "ASL-MobileAPP/",
-        "ASL-CallAPP/"
+        "src/main/java/com/ipn/escom/crypto/service/AesCipherService.java",
+        "src/main/java/com/ipn/escom/crypto/service/DiffieHellmanService.java"
       ],
       "deliverables": [
-        "Los scripts Python editados compilan",
-        "Las rutas de dataset y artefactos siguen siendo validas",
-        "Cualquier limitacion de ejecucion por camara o tamano del dataset queda documentada de forma explicita"
+        "Endpoint POST /api/crypto/process para recibir archivo binario, flags de servicio y parametros DH, retornando JSON empaquetado",
+        "Endpoint POST /api/crypto/verify-decrypt para recibir paquete JSON y URL de llave publica, retornando estatus de integridad y archivo recuperado",
+        "CORS configurado para permitir conexion transparente con el frontend que se elija posteriormente",
+        "Respuestas HTTP claras ante violacion de integridad o firmas no coincidentes"
       ],
       "verification": [
-        "python -m py_compile ASL-IA/src/<archivo-editado>.py"
+        "./mvnw test -Dtest=CryptoProcessControllerTest",
+        "./mvnw clean compile"
       ],
       "status": "pending"
-    },
-    {
-      "id": 8,
-      "name": "monorepo_dev_infra",
-      "module": "repo-root",
-      "title": "Mantener la infraestructura de desarrollo del monorepo",
-      "description": "Cambios limitados a scripts de raiz, metadata del workspace, automatizacion local, documentacion y arranque del entorno.",
-      "allowed_paths": [
-        "run.ps1",
-        "README.md",
-        "asl-system.code-workspace",
-        ".agents/",
-        ".gitignore",
-        ".gitmodules"
-      ],
-      "forbidden_paths": [
-        "ASL-Web/src/",
-        "ASL-Web/server/",
-        "ASL-MobileAPP/app/",
-        "ASL-CallAPP/app/src/",
-        "ASL-CallAPP/server/index.js",
-        "ASL-IA/src/"
-      ],
-      "deliverables": [
-        "Los scripts de raiz siguen apuntando a rutas reales",
-        "La documentacion y la automatizacion siguen alineadas con el layout actual del repo",
-        "No se introduce ningun secreto ni supuesto dependiente de una maquina especifica"
-      ],
-      "verification": [
-        "revision manual de humo del script o config cambiado",
-        "ejecucion dirigida del comando afectado cuando aplique"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": 9,
-      "name": "mobile_guest_call_flow",
-      "module": "ASL-MobileAPP",
-      "title": "Completar el flujo de llamada del huesped hacia ASL-CallAPP",
-      "description": "Cambios limitados al inicio de sesion de llamada desde la app movil, solicitud de call session, conexion websocket al servidor de llamadas y estados visibles del huesped durante la llamada.",
-      "allowed_paths": [
-        "ASL-MobileAPP/app/ASL/CallScreen.tsx",
-        "ASL-MobileAPP/services/call.ts",
-        "ASL-MobileAPP/services/auth.ts",
-        "ASL-MobileAPP/components/BothComponents/",
-        "ASL-MobileAPP/hooks/",
-        "ASL-MobileAPP/constants/",
-        "ASL-MobileAPP/styles/"
-      ],
-      "forbidden_paths": [
-        "ASL-Web/src/",
-        "ASL-Web/server/",
-        "ASL-CallAPP/app/",
-        "ASL-CallAPP/server/",
-        "ASL-IA/"
-      ],
-      "deliverables": [
-        "La app movil puede solicitar una call session valida y conectarse al websocket de ASL-CallAPP",
-        "Los estados de llamada del huesped cubren pending, accepted, unavailable, ended y error sin contradicciones",
-        "La navegacion y el contexto autenticado del huesped siguen siendo consistentes al entrar y salir de la llamada"
-      ],
-      "verification": [
-        "cd ASL-MobileAPP && npm run lint",
-        "cd ASL-MobileAPP && npm run typecheck"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": 10,
-      "name": "web_server_call_session_bridge",
-      "module": "ASL-Web/server",
-      "title": "Mantener el puente de sesion y seguimiento entre ASL-MobileAPP y ASL-CallAPP",
-      "description": "Cambios limitados al backend web que emite call tokens para huesped, define la URL del call server y persiste los reportes o follow-ups reenviados desde ASL-CallAPP.",
-      "allowed_paths": [
-        "ASL-Web/server/routes/calls.js",
-        "ASL-Web/server/models/InterpreterReport.js",
-        "ASL-Web/server/models/Request.js",
-        "ASL-Web/server/models/Stay.js",
-        "ASL-Web/server/middleware/auth.js",
-        "ASL-Web/server/services/stayLifecycle.js",
-        "ASL-Web/server/services/operationalLogs.js"
-      ],
-      "forbidden_paths": [
-        "ASL-Web/src/",
-        "ASL-MobileAPP/",
-        "ASL-CallAPP/",
-        "ASL-IA/"
-      ],
-      "deliverables": [
-        "La ruta de call session entrega token, expiracion y URL del call server compatibles con el flujo movil",
-        "El backend persiste correctamente interpreter reports y follow-up requests reenviados desde ASL-CallAPP",
-        "No quedan desajustes entre autenticacion del huesped, stay activa y contratos del bridge de llamada"
-      ],
-      "verification": [
-        "cd ASL-Web/server && npm start o npm run dev para validacion de humo"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": 11,
-      "name": "mobile_guest_video_call_media",
-      "module": "ASL-MobileAPP",
-      "title": "Agregar la capa de medios de videollamada para el huesped",
-      "description": "Cambios limitados a la app movil para capturar/renderizar medios locales y remotos sobre el flujo de signaling ya existente, incluyendo permisos, manejo de stream y controles basicos de videollamada.",
-      "allowed_paths": [
-        "ASL-MobileAPP/app/ASL/CallScreen.tsx",
-        "ASL-MobileAPP/services/call.ts",
-        "ASL-MobileAPP/services/",
-        "ASL-MobileAPP/components/BothComponents/",
-        "ASL-MobileAPP/components/ASLComponents/",
-        "ASL-MobileAPP/hooks/",
-        "ASL-MobileAPP/constants/",
-        "ASL-MobileAPP/styles/",
-        "ASL-MobileAPP/package.json",
-        "ASL-MobileAPP/app.json"
-      ],
-      "forbidden_paths": [
-        "ASL-Web/",
-        "ASL-CallAPP/app/",
-        "ASL-CallAPP/server/",
-        "ASL-IA/"
-      ],
-      "deliverables": [
-        "La pantalla de llamada del huesped puede inicializar medios locales y negociar la videollamada usando el signaling existente",
-        "La UI muestra estados coherentes para preview local, conexion remota, fin de llamada y errores de permisos o media",
-        "Los cambios no rompen el flujo ASL ni la autenticacion existente del huesped"
-      ],
-      "verification": [
-        "cd ASL-MobileAPP && npm run lint",
-        "cd ASL-MobileAPP && npm run typecheck"
-      ],
-      "status": "in_progress"
-    },
-    {
-      "id": 12,
-      "name": "callapp_interpreter_video_call_media",
-      "module": "ASL-CallAPP/app",
-      "title": "Agregar la capa de medios de videollamada en la consola del interprete",
-      "description": "Cambios limitados a la consola web del interprete para conectar WebRTC/media sobre el signaling actual, renderizar video local/remoto y exponer controles visibles de sesion sin alterar el backend de llamadas.",
-      "allowed_paths": [
-        "ASL-CallAPP/app/src/",
-        "ASL-CallAPP/app/index.html",
-        "ASL-CallAPP/app/package.json",
-        "ASL-CallAPP/app/vite.config.ts",
-        "ASL-CallAPP/app/tsconfig.json"
-      ],
-      "forbidden_paths": [
-        "ASL-CallAPP/server/",
-        "ASL-Web/",
-        "ASL-MobileAPP/",
-        "ASL-IA/"
-      ],
-      "deliverables": [
-        "La consola del interprete puede negociar y renderizar videollamada usando los eventos websocket ya disponibles",
-        "La interfaz muestra preview local, video remoto y controles basicos de sesion acordes al estado de llamada",
-        "La captura de reporte y los estados existentes no quedan rotos por la incorporacion de media"
-      ],
-      "verification": [
-        "cd ASL-CallAPP/app && npm run build"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": 13,
-      "name": "mobile_guest_webrtc_media_core",
-      "module": "ASL-MobileAPP",
-      "title": "Implementar el nucleo WebRTC y permisos de media para el huesped",
-      "description": "Cambios limitados a la app movil para pedir permisos, inicializar medios locales, montar el peer connection del huesped y negociar oferta, respuesta y ICE sobre el signaling ya existente con ASL-CallAPP.",
-      "allowed_paths": [
-        "ASL-MobileAPP/app/ASL/CallScreen.tsx",
-        "ASL-MobileAPP/services/call.ts",
-        "ASL-MobileAPP/services/",
-        "ASL-MobileAPP/hooks/",
-        "ASL-MobileAPP/constants/",
-        "ASL-MobileAPP/package.json",
-        "ASL-MobileAPP/app.json"
-      ],
-      "forbidden_paths": [
-        "ASL-Web/",
-        "ASL-CallAPP/app/",
-        "ASL-CallAPP/server/",
-        "ASL-IA/"
-      ],
-      "deliverables": [
-        "La pantalla del huesped solicita permisos de camara y microfono antes de negociar media",
-        "El huesped crea su peer connection y procesa WEBRTC_OFFER, WEBRTC_ANSWER y WEBRTC_ICE_CANDIDATE sin romper el signaling existente",
-        "El ciclo de vida de media limpia tracks, sockets y peer state al salir o terminar la llamada"
-      ],
-      "verification": [
-        "cd ASL-MobileAPP && npm run lint",
-        "cd ASL-MobileAPP && npm run typecheck"
-      ],
-      "status": "done"
-    },
-    {
-      "id": 14,
-      "name": "mobile_guest_video_call_ui_controls",
-      "module": "ASL-MobileAPP",
-      "title": "Completar la UI de videollamada del huesped con preview, remoto y controles",
-      "description": "Cambios limitados a la app movil para renderizar preview local y stream remoto del huesped, mostrar estados de media coherentes y exponer controles visibles de videollamada sobre el flujo WebRTC ya habilitado.",
-      "allowed_paths": [
-        "ASL-MobileAPP/app/ASL/CallScreen.tsx",
-        "ASL-MobileAPP/components/BothComponents/",
-        "ASL-MobileAPP/components/ASLComponents/",
-        "ASL-MobileAPP/hooks/",
-        "ASL-MobileAPP/constants/",
-        "ASL-MobileAPP/styles/"
-      ],
-      "forbidden_paths": [
-        "ASL-Web/",
-        "ASL-CallAPP/app/",
-        "ASL-CallAPP/server/",
-        "ASL-IA/"
-      ],
-      "deliverables": [
-        "La pantalla del huesped muestra preview local y estado del stream remoto sin depender de texto provisional",
-        "La UI expone controles basicos de camara, microfono, fin de llamada y reintento de media con estados visibles coherentes",
-        "Los estados pending, accepted, connecting, connected, ended y error siguen siendo comprensibles para el huesped"
-      ],
-      "verification": [
-        "cd ASL-MobileAPP && npm run lint",
-        "cd ASL-MobileAPP && npm run typecheck"
-      ],
-      "status": "done"
-    },
-    {
-      "id": 15,
-      "name": "web_server_single_tunnel_call_proxy",
-      "module": "ASL-Web/server",
-      "title": "Exponer ASL-CallAPP detras del backend web para un solo tunel publico",
-      "description": "Cambios limitados al backend web para actuar como punto de entrada publico unico, reenviando HTTP y WebSocket de llamadas hacia ASL-CallAPP sin exigir un segundo dominio ngrok para la videollamada.",
-      "allowed_paths": [
-        "ASL-Web/server/index.js",
-        "ASL-Web/server/routes/calls.js",
-        "ASL-Web/server/package.json",
-        "ASL-Web/server/package-lock.json",
-        "ASL-Web/server/.env.example",
-        "ASL-Web/server/middleware/",
-        "ASL-Web/server/utils/"
-      ],
-      "forbidden_paths": [
-        "ASL-Web/src/",
-        "ASL-MobileAPP/",
-        "ASL-CallAPP/",
-        "ASL-IA/",
-        "run.ps1",
-        "README.md",
-        ".agents/agents/"
-      ],
-      "deliverables": [
-        "El backend web acepta trafico publico de llamadas y lo reenvia a ASL-CallAPP por rutas HTTP y upgrade WebSocket coherentes",
-        "La call session que consume la app movil puede resolverse con una sola URL publica sin depender de pooling accidental de ngrok",
-        "Las variables de entorno nuevas o ajustadas quedan reflejadas en .env.example y no rompen el backend actual"
-      ],
-      "verification": [
-        "cd ASL-Web/server && npm start o npm run dev para validacion de humo"
-      ],
-      "status": "done"
-    },
-    {
-      "id": 16,
-      "name": "repo_single_tunnel_runbook",
-      "module": "repo-root",
-      "title": "Alinear el arranque local y el runbook con el tunel unico",
-      "description": "Cambios limitados a scripts de raiz y documentacion para que el flujo local use un solo tunel publico respaldado por el proxy del backend web.",
-      "allowed_paths": [
-        "run.ps1",
-        "README.md",
-        "ASL-Web/README.md",
-        "ASL-CallAPP/README.md",
-        ".agents/feature_list.json"
-      ],
-      "forbidden_paths": [
-        "ASL-Web/src/",
-        "ASL-Web/server/",
-        "ASL-MobileAPP/",
-        "ASL-CallAPP/app/",
-        "ASL-CallAPP/server/",
-        "ASL-IA/"
-      ],
-      "deliverables": [
-        "El script de arranque y la documentacion explican el tunel unico y dejan de sugerir exponer 3101 por separado cuando no aplica",
-        "Las instrucciones del repo quedan alineadas con el proxy del backend web y con la limitacion de un solo dominio en ngrok free",
-        "No se introduce ninguna ruta local ni secreto dependiente de una sola maquina"
-      ],
-      "verification": [
-        "revision manual de humo del script o config cambiado",
-        "ejecucion dirigida del comando afectado cuando aplique"
-      ],
-      "status": "done"
-    },
-    {
-      "id": 17,
-      "name": "repo_nginx_gateway_base",
-      "module": "repo-root",
-      "title": "Introducir un gateway Nginx escalable como entrada publica unica",
-      "description": "Cambios limitados a infraestructura de raiz para agregar una configuracion Nginx reusable que enrute HTTP y WebSocket por path hacia ASL-Web/server y ASL-CallAPP/server, junto con el arranque y runbook asociados.",
-      "allowed_paths": [
-        "run.ps1",
-        "README.md",
-        "infra/nginx/",
-        "docker-compose.nginx.yml",
-        ".agents/feature_list.json"
-      ],
-      "forbidden_paths": [
-        "ASL-Web/src/",
-        "ASL-Web/server/",
-        "ASL-MobileAPP/",
-        "ASL-CallAPP/",
-        "ASL-IA/"
-      ],
-      "deliverables": [
-        "Existe una configuracion Nginx versionable que enruta por path hacia los servicios actuales sin inspeccionar payloads de aplicacion",
-        "El runbook de arranque deja claro que Nginx es la entrada publica recomendada y que el tunel remoto debe publicar el gateway",
-        "La infraestructura propuesta no introduce secretos ni depende de un dominio especifico fijo"
-      ],
-      "verification": [
-        "revision manual de humo del script o config cambiado",
-        "ejecucion dirigida del comando afectado cuando aplique"
-      ],
-      "status": "done"
-    },
-    {
-      "id": 18,
-      "name": "web_server_hotel_socket_path_normalization",
-      "module": "ASL-Web/server",
-      "title": "Normalizar el WebSocket operativo del hotel a una ruta explicita",
-      "description": "Cambios limitados al backend web para dejar de depender del root websocket y exponer una ruta explicita como /ws/hotel o equivalente, facilitando el enrutamiento limpio desde Nginx.",
-      "allowed_paths": [
-        "ASL-Web/server/index.js",
-        "ASL-Web/server/.env.example",
-        "ASL-Web/server/middleware/",
-        "ASL-Web/server/utils/"
-      ],
-      "forbidden_paths": [
-        "ASL-Web/src/",
-        "ASL-MobileAPP/",
-        "ASL-CallAPP/",
-        "ASL-IA/",
-        "run.ps1",
-        "README.md"
-      ],
-      "deliverables": [
-        "El backend web acepta su WebSocket operativo en una ruta dedicada y mantiene autenticacion y comportamiento actual",
-        "La nueva ruta queda documentada por entorno si requiere variable nueva",
-        "No se rompe el manejo existente de upgrades para /calls ni el resto del backend"
-      ],
-      "verification": [
-        "cd ASL-Web/server && npm start o npm run dev para validacion de humo"
-      ],
-      "status": "done"
-    },
-    {
-      "id": 19,
-      "name": "mobile_gateway_endpoint_alignment",
-      "module": "ASL-MobileAPP",
-      "title": "Alinear la app movil con el gateway y rutas publicas normalizadas",
-      "description": "Cambios limitados a la app movil para consumir el gateway Nginx como entrada unica y usar rutas explicitas para websocket operativo y videollamada sin asumir root ambiguo.",
-      "allowed_paths": [
-        "ASL-MobileAPP/app/ASL/CallScreen.tsx",
-        "ASL-MobileAPP/services/socket.tsx",
-        "ASL-MobileAPP/services/call.ts",
-        "ASL-MobileAPP/services/auth.ts",
-        "ASL-MobileAPP/constants/",
-        "ASL-MobileAPP/hooks/"
-      ],
-      "forbidden_paths": [
-        "ASL-Web/",
-        "ASL-CallAPP/",
-        "ASL-IA/",
-        "run.ps1",
-        "README.md"
-      ],
-      "deliverables": [
-        "La app movil usa una base publica unica para HTTP y WebSocket con rutas coherentes",
-        "El websocket operativo y el flujo de videollamada dejan de competir por el root del dominio",
-        "No se rompen auth, call session ni estados visibles del huesped"
-      ],
-      "verification": [
-        "cd ASL-MobileAPP && npm run lint",
-        "cd ASL-MobileAPP && npm run typecheck"
-      ],
-      "status": "done"
-    },
-    {
-      "id": 20,
-      "name": "callapp_gateway_contract_alignment",
-      "module": "ASL-CallAPP/server",
-      "title": "Alinear el servidor de llamadas con el gateway Nginx",
-      "description": "Cambios limitados al servidor de llamadas para documentar y endurecer su contrato detras de Nginx, incluyendo headers forward, origins y rutas publicadas por el gateway.",
-      "allowed_paths": [
-        "ASL-CallAPP/server/index.js",
-        "ASL-CallAPP/server/.env.example",
-        "ASL-CallAPP/server/package.json",
-        "ASL-CallAPP/server/package-lock.json"
-      ],
-      "forbidden_paths": [
-        "ASL-CallAPP/app/",
-        "ASL-Web/",
-        "ASL-MobileAPP/",
-        "ASL-IA/",
-        "run.ps1",
-        "README.md"
-      ],
-      "deliverables": [
-        "El servidor de llamadas queda listo para operar detras de un reverse proxy con WebSocket y CORS coherentes",
-        "Las variables de entorno reflejan el despliegue detras del gateway sin mezclar upstream interno con URL publica",
-        "No se rompen login de interprete, presence ni signaling"
-      ],
-      "verification": [
-        "cd ASL-CallAPP/server && npm start o npm run dev para validacion de humo"
-      ],
-      "status": "done"
     }
   ]
 }
