@@ -172,7 +172,7 @@ public class CryptoProcessController {
         @Bean
         @Order(1)
         SecurityFilterChain cryptoApiSecurity(HttpSecurity http,
-                @Value("${crypto.cors.allowed-origins:http://localhost:5173,http://localhost:3000}") String origins)
+                @Value("${crypto.cors.allowed-origins:http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000}") String origins)
                 throws Exception {
             CorsConfiguration cors = new CorsConfiguration();
             cors.setAllowedOrigins(Arrays.stream(origins.split(",")).map(String::trim)

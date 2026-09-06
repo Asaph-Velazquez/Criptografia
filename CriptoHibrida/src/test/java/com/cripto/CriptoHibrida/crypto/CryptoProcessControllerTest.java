@@ -222,16 +222,18 @@ class CryptoProcessControllerTest {
                 .andExpect(status().is(413));
     }
 
-    @Test
-    void corsAllowsConfiguredFrontendAndExposesDownloadHeaders() throws Exception {
-        mvc.perform(options("/api/crypto/process").header(HttpHeaders.ORIGIN, "http://localhost:5173")
+    @ParameterizedTest
+    @ValueSource(strings = {"http://localhost:5173", "http://127.0.0.1:5173",
+            "http://localhost:3000", "http://127.0.0.1:3000"})
+    void corsAllowsConfiguredFrontendAndExposesDownloadHeaders(String origin) throws Exception {
+        mvc.perform(options("/api/crypto/process").header(HttpHeaders.ORIGIN, origin)
                 .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST")
                 .header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "content-type"))
                 .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:5173"));
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, origin));
         mvc.perform(multipart("/api/crypto/process").file(new MockMultipartFile("file", new byte[0]))
                 .file(optionsPart(emission(false, true))).file(new MockMultipartFile("privateKey", privatePem))
-                .header(HttpHeaders.ORIGIN, "http://localhost:5173"))
+                .header(HttpHeaders.ORIGIN, origin))
                 .andExpect(status().isOk()).andExpect(header().string(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
                         "Content-Disposition, X-Integrity-Status"));
         mvc.perform(options("/api/crypto/process").header(HttpHeaders.ORIGIN, "https://unconfigured.example")
