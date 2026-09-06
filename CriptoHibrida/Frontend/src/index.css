@@ -1,0 +1,126 @@
+:root {
+  font-family:'Segoe UI',Arial,sans-serif;
+  color:#24314b;
+  background:#f3f5f9;
+  font-synthesis:none;
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  font-weight:400;
+  font-size:14px;
+  line-height:1.5;
+  color-scheme:light;
+  --ink:#24314b;
+  --muted:#707a8e;
+  --blue:#4056c8;
+  --border:#e5e8f0;
+  --lavender:#e9ecfa
+}
+
+* {
+  box-sizing:border-box
+}
+
+body {
+  margin:0;
+  min-width:360px
+}
+
+button,input {
+  font:inherit
+}
+
+button,a,input,label {
+  -webkit-tap-highlight-color:transparent
+}
+
+button {
+  cursor:pointer
+}
+
+button {
+  color:inherit
+}
+
+button:disabled {
+  cursor:not-allowed;
+  opacity:.55
+}
+
+button:focus-visible,a:focus-visible,input:focus-visible {
+  outline:3px solid #8a9cef;
+  outline-offset:4px
+}
+
+a {
+  color:inherit
+}
+
+svg {
+  flex-shrink:0
+}
+
+button {
+  border:0
+}
+
+h1,h2,h3,p {
+  margin:0
+}
+
+h1,h2,h3 {
+  font-family:Bahnschrift,'Segoe UI',sans-serif;
+  font-weight:600
+}
+
+h1 {
+  font-size:38px;
+  line-height:1.2;
+  letter-spacing:-1.2px
+}
+
+h2 {
+  font-size:18px;
+  line-height:1.35
+}
+
+h3 {
+  font-size:16px
+}
+
+p {
+  color:var(--muted);
+  line-height:1.65
+}
+
+fieldset {
+  border:0;
+  padding:0;
+  margin:0;
+  min-width:0
+}
+
+[hidden] {
+  display:none!important
+}
+
+button {
+  transition:background-color .15s,color .15s
+}
+
+button:disabled {
+  transition:none
+}
+
+::selection {
+  background:#dce1ff
+}
+
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after {
+    scroll-behavior:auto!important;
+    transition:none!important;
+    animation:none!important
+  }
+}
+
