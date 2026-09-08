@@ -6,7 +6,12 @@
     "require_verification_to_close": true,
     "require_module_boundary": true,
     "require_user_or_agent_summary": true,
-    "valid_status": ["pending", "in_progress", "done", "blocked"]
+    "valid_status": [
+      "pending",
+      "in_progress",
+      "done",
+      "blocked"
+    ]
   },
   "verification_profile": {
     "backend_build": [
@@ -181,11 +186,49 @@
       "module": "frontend",
       "title": "Crear interfaz React Vite para transferencia criptografica",
       "description": "Interfaz de emision y recepcion conectada a la API, preparacion local de llaves y animaciones de carga Thinking Orb.",
-      "allowed_paths": ["Frontend/", ".agents/feature_list.json"],
-      "forbidden_paths": ["src/main/java/"],
-      "deliverables": ["Flujos accesibles de envio y recepcion multipart", "Preparacion y carga de llaves RSA y DH", "Thinking Orb durante operaciones y diseno responsive"],
-      "verification": ["cd Frontend && npm run lint", "cd Frontend && npm run build", "Revision visual y funcional en navegador"],
+      "allowed_paths": [
+        "Frontend/",
+        ".agents/feature_list.json"
+      ],
+      "forbidden_paths": [
+        "src/main/java/"
+      ],
+      "deliverables": [
+        "Flujos accesibles de envio y recepcion multipart",
+        "Preparacion y carga de llaves RSA y DH",
+        "Thinking Orb durante operaciones y diseno responsive"
+      ],
+      "verification": [
+        "cd Frontend && npm run lint",
+        "cd Frontend && npm run build",
+        "Revision visual y funcional en navegador"
+      ],
       "status": "done"
+    },
+    {
+      "id": 8,
+      "name": "about_orbs_docker",
+      "module": "frontend-deployment",
+      "title": "Actualizar navegacion, creditos ESCOM y empaquetado Docker",
+      "allowed_paths": [
+        "Frontend/",
+        "Dockerfile",
+        ".dockerignore",
+        "compose.yaml",
+        "DEPLOYMENT.md",
+        "src/main/java/com/cripto/CriptoHibrida/crypto/controller/CryptoProcessController.java",
+        "src/test/java/com/cripto/CriptoHibrida/crypto/CryptoProcessControllerTest.java",
+        ".agents/feature_list.json"
+      ],
+      "verification": [
+        "npm run lint",
+        "npm run build",
+        "npm test",
+        "mvn test",
+        "docker build -t nexo:local ."
+      ],
+      "status": "blocked",
+      "verification_notes": "Implementacion terminada. Pasaron lint/build, 6 tests Node, 67 tests Maven, revision visual desktop/mobile, integracion binaria con assets servidos por Spring Boot y cabeceras HTTPS de proxy, docker build --check y compose config. Pendiente build/run de contenedor: descargas externas de imagenes base y plugins Maven demasiado lentas; intentos interrumpidos. No se publico ni desplego."
     }
   ]
 }
