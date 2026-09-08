@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
-  <title id="title">Espacio para captura de Verificación</title><desc id="desc">Marcador de posición para una captura de resultado verificado.</desc>
-  <rect width="1440" height="900" fill="#f3f5f9"/><rect x="72" y="72" width="1296" height="756" rx="24" fill="#fff" stroke="#dfe4ee" stroke-width="4"/>
-  <rect x="128" y="144" width="420" height="38" rx="19" fill="#e8edff"/><rect x="128" y="232" width="1184" height="416" rx="16" fill="#f8faff" stroke="#dfe4ee" stroke-width="3" stroke-dasharray="12 12"/>
-  <circle cx="720" cy="405" r="68" fill="#e9f6ef"/><path d="m681 405 27 27 52-59" fill="none" stroke="#448163" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="720" y="570" text-anchor="middle" fill="#4056c8" font-family="Arial, sans-serif" font-size="32" font-weight="700">Añade aquí la captura de resultado verificado</text>
-  <text x="720" y="620" text-anchor="middle" fill="#71809a" font-family="Arial, sans-serif" font-size="22">docs/images/verificacion.png</text>
-</svg>

@@ -14,19 +14,8 @@
 > Proyecto académico de la Escuela Superior de Cómputo (ESCOM) del Instituto Politécnico Nacional (IPN).
 
 ## Vista previa
-
-Reemplaza cada panel de ejemplo por una captura real manteniendo el mismo nombre de archivo. Las imágenes se guardan en [`docs/images`](docs/images).
-
-| Transferencia de archivos | Gestión de llaves |
-| --- | --- |
-| ![Espacio para la captura de transferencia](docs/images/transferencia.svg) | ![Espacio para la captura de llaves](docs/images/llaves.svg) |
-
-| Página Acerca de | Resultado verificado |
-| --- | --- |
-| ![Espacio para la captura de la página Acerca de](docs/images/acerca-de.svg) | ![Espacio para la captura de verificación](docs/images/verificacion.svg) |
-
-Los paneles son marcadores de posición visibles. Sustituye cada archivo SVG por una captura PNG o WebP conservando su nombre base, y ajusta la extensión en este README. Consulta [`docs/images/README.md`](docs/images/README.md) para los tamaños recomendados.
-
+![](docs/images/nexo.png)
+![](docs/images/Llaves.png)
 ## Características
 
 - Cifrado de archivos con AES-256-CBC derivado de un intercambio Diffie-Hellman.
