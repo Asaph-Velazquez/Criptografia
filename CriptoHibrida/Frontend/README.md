@@ -59,6 +59,8 @@ La prueba de integración usa el mismo cliente multipart de la interfaz. Comprue
 
 ## Publicación
 
+Para empaquetar interfaz y backend en una sola imagen y desplegarla en EC2, sigue [la guía de Docker y despliegue](../DEPLOYMENT.md).
+
 `npm run build` genera `dist`. Sirve esa carpeta con una ruta `/api` hacia Spring Boot o define `VITE_API_BASE_URL` al compilar. Si frontend y backend están en orígenes distintos, configura `crypto.cors.allowed-origins` en Spring Boot; sus valores locales predeterminados incluyen los puertos 5173 y 3000. Las APIs de generación de llaves requieren un contexto seguro (HTTPS o localhost).
 
 Thinking Orb respeta `prefers-reduced-motion`. Las cargas admiten selección con teclado y arrastrar archivos. El diseño se adapta a escritorio y móvil.

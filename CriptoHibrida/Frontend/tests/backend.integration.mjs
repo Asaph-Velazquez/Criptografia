@@ -4,7 +4,7 @@ import { transfer } from '../src/lib/api.ts'
 
 // Exercise the same client and Vite proxy used by the browser, against the real backend.
 const nativeFetch = globalThis.fetch
-globalThis.fetch = (url, options) => nativeFetch(new URL(url, 'http://localhost:5173'), options)
+globalThis.fetch = (url, options) => nativeFetch(new URL(url, process.env.TEST_BASE_URL ?? 'http://localhost:5173'), options)
 const dh = generateDh()
 const rsa = await generateRsa()
 const bytes = Uint8Array.from({ length: 4097 }, (_, index) => index % 256)

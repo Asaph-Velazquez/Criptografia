@@ -241,6 +241,16 @@ class CryptoProcessControllerTest {
     }
 
     @Test
+    void staticResourceAccessDoesNotOpenOtherRoutes() throws Exception {
+        // Missing assets reach MVC (404), rather than being rejected by security (403).
+        mvc.perform(get("/assets/nonexistent-security-test.js")).andExpect(status().isNotFound());
+        mvc.perform(head("/assets/nonexistent-security-test.js")).andExpect(status().isNotFound());
+        mvc.perform(get("/admin")).andExpect(status().isForbidden());
+        mvc.perform(get("/api/crypto/process")).andExpect(status().isForbidden());
+        mvc.perform(post("/index.html")).andExpect(status().isForbidden());
+    }
+
+    @Test
     void downloadFilenameCannotInjectHeadersOrPaths() throws Exception {
         EncryptedPackage original = packages.deserialize(emit(new byte[]{1, 2}, false, true));
         byte[] json = packages.serialize(new EncryptedPackage(original.remitente(), "../../mal\r\nicioso.mp4",

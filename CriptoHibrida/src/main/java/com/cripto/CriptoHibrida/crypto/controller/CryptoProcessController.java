@@ -200,6 +200,10 @@ public class CryptoProcessController {
         SecurityFilterChain otherRoutes(HttpSecurity http) throws Exception {
             return http.authorizeHttpRequests(config -> config
                     .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
+                    .requestMatchers(org.springframework.http.HttpMethod.GET,
+                            "/", "/index.html", "/favicon.svg", "/icons.svg", "/assets/**").permitAll()
+                    .requestMatchers(org.springframework.http.HttpMethod.HEAD,
+                            "/", "/index.html", "/favicon.svg", "/icons.svg", "/assets/**").permitAll()
                     .anyRequest().denyAll()).build();
         }
 
