@@ -11,7 +11,7 @@ import type { TransferResult } from './lib/api'
 import './App.css'
 
 function App() {
-  const [page, setPage] = useState<'transfer' | 'keys' | 'guide'>('transfer')
+  const [page, setPage] = useState<'transfer' | 'keys' | 'guide' | 'about'>('transfer')
   const [direction, setDirection] = useState<'send' | 'receive'>('send')
   const [file, setFile] = useState<File | null>(null)
   const [cipher, setCipher] = useState(true)
@@ -89,12 +89,27 @@ function App() {
         <button className={page === 'transfer' ? 'nav-item active' : 'nav-item'} disabled={busy} onClick={() => setPage('transfer')}><Icon name="transfer" />Transferir archivos<Icon name="chevron" size={15} /></button>
         <button className={page === 'keys' ? 'nav-item active' : 'nav-item'} disabled={busy} onClick={() => setPage('keys')}><Icon name="key" />Mis llaves</button>
         <button className={page === 'guide' ? 'nav-item active' : 'nav-item'} disabled={busy} onClick={() => setPage('guide')}><Icon name="help" />Cómo funciona</button>
+        <button className={page === 'about' ? 'nav-item active' : 'nav-item'} disabled={busy} onClick={() => setPage('about')}><Icon name="info" />Acerca de</button>
       </nav>
-      <div className="sidebar-bottom"><div className="sidebar-note"><span className="mini-lock"><Icon name="lock" size={18} /></span><h3>La privacidad empieza<br />con un buen intercambio.</h3><p>Comparte tus llaves públicas.<br />Conserva las privadas.</p><button className="text-button" disabled={busy} onClick={() => setPage('guide')}>Conocer el proceso <Icon name="arrow" size={15} /></button></div><div className="session"><span className="avatar">N</span><span>Sesión de trabajo<small>Sin historial guardado</small></span></div></div>
+      <div className="sidebar-bottom"><div className="sidebar-orb" aria-hidden="true"><ThinkingOrb state="connecting" size={64} theme="light" /></div></div>
     </aside>
     <div className="main-shell">
-      <header className="topbar"><div className="breadcrumb">Espacio personal <Icon name="chevron" size={14} /><strong>{page === 'keys' ? 'Mis llaves' : page === 'guide' ? 'Cómo funciona' : 'Transferir archivos'}</strong></div><button className="help-button" disabled={busy} onClick={() => setPage('guide')}><Icon name="help" size={17} /><span>Guía rápida</span></button></header>
+      <header className="topbar"><div className="breadcrumb">Espacio personal <Icon name="chevron" size={14} /><strong>{page === 'keys' ? 'Mis llaves' : page === 'guide' ? 'Cómo funciona' : page === 'about' ? 'Acerca de' : 'Transferir archivos'}</strong></div><button className="help-button" disabled={busy} onClick={() => setPage('guide')}><Icon name="help" size={17} /><span>Guía rápida</span></button></header>
       <main>
+        {page === 'about' && <section className="about-page" aria-labelledby="about-title">
+          <div className="page-heading"><div><h1 id="about-title">Acerca de</h1><p>Criptografía aplicada, conocimiento compartido.</p></div></div>
+          <article className="about-card">
+            <span className="about-eyebrow">IPN · ESCOM</span>
+            <h2>Un proyecto académico de criptografía híbrida.</h2>
+            <p>Desarrollado en la Escuela Superior de Cómputo (ESCOM) del Instituto Politécnico Nacional (IPN). Nexo explora el intercambio de llaves Diffie-Hellman, el cifrado AES y la firma digital RSA para proteger archivos y verificar su integridad.</p>
+            <div className="about-authors"><h3>Realizado por</h3><ul>
+              <li>Carmona Marinez Ricardo</li>
+              <li>Diaz Torres Jonathan Samuel</li>
+              <li>Velazquez Parral Saul Asaph</li>
+            </ul></div>
+            <div className="about-orb" aria-hidden="true"><ThinkingOrb state="weaving" size={64} theme="light" /></div>
+          </article>
+        </section>}
         <div hidden={page !== 'keys'}><KeyManager onUseDh={keys => { setReceiveDh(keys); setReceiveDhFile(new File([JSON.stringify(keys)], 'respaldo-privado-dh.json')); setResult(null) }} onUseRsa={keys => { setSendPem(keys.privateKey); setReceivePem(keys.publicKey); setResult(null) }} /></div>
         {page === 'guide' && <section className="guide-page"><div className="page-heading"><div><h1>De un archivo a un intercambio seguro.</h1><p>Dos personas. Llaves distintas. Un archivo que llega intacto.</p></div></div><div className="guide-flow">{[
           ['Prepara la recepción', 'La persona que recibirá el archivo crea sus llaves de intercambio en Mis llaves. Envía el JSON público al remitente y guarda el respaldo privado.'],

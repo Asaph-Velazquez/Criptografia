@@ -101,61 +101,32 @@
   margin-top:auto
 }
 
-.sidebar-note {
-  margin:35px 5px 27px;
-  padding:20px 13px;
-  border-top:1px solid var(--border)
-}
-
-.mini-lock {
-  color:#747fac;
-  display:block;
-  margin-bottom:14px
-}
-
-.sidebar-note h3 {
-  font-size:14px;
-  line-height:1.65;
-  letter-spacing:-.1px;
-  margin-bottom:9px
-}
-
-.sidebar-note p {
-  font-size:11px;
-  line-height:1.8
-}
-
-.sidebar-note .text-button {
-  font-size:11px;
-  margin-top:15px
-}
-
-.session {
-  display:flex;
-  align-items:center;
-  gap:11px;
-  border-top:1px solid var(--border);
-  padding:22px 8px;
-  font-size:12px
-}
-
-.session small {
-  display:block;
-  color:var(--muted);
-  font-size:10px;
-  margin-top:2px
-}
-
-.avatar {
-  width:32px;
-  height:32px;
-  background:#e9ecf4;
-  border-radius:50%;
+.sidebar-orb {
   display:grid;
   place-items:center;
-  font-family:Bahnschrift,sans-serif;
-  color:#4d5c7c
+  min-height:190px;
+  margin:24px 0;
+  background:radial-gradient(ellipse, #eef0fc 0%, transparent 70%)
 }
+
+.sidebar-orb canvas { transform:scale(1.7) }
+
+.about-page { max-width:850px; margin:0 auto }
+.about-card {
+  padding:clamp(26px, 5vw, 58px);
+  background:white;
+  border:1px solid var(--border);
+  border-radius:16px
+}
+.about-eyebrow { color:var(--blue); font-size:12px; font-weight:600; letter-spacing:2px }
+.about-card h2 { font-size:clamp(25px, 3vw, 36px); max-width:24ch; margin:20px 0 }
+.about-card>p { max-width:65ch; font-size:14px }
+.about-authors { margin-top:32px; padding-top:26px; border-top:1px solid var(--border) }
+.about-authors h3 { font-size:13px; color:var(--muted); font-weight:400 }
+.about-authors ul { list-style:none; padding:0; margin:16px 0 0; display:grid; gap:12px }
+.about-authors li { font-size:15px; font-weight:500 }
+.about-orb { display:grid; place-items:center; height:280px; margin-top:24px; background:radial-gradient(ellipse, #f0f2ff 0%, transparent 65%) }
+.about-orb canvas { transform:scale(3.5) }
 
 .main-shell {
   margin-left:230px;
@@ -1284,9 +1255,6 @@ main {
     margin:0;
     white-space:nowrap
   }
-  .sidebar-note {
-    padding:20px 6px
-  }
   .nav-item {
     padding:12px 9px;
     font-size:12px;
@@ -1294,9 +1262,6 @@ main {
   }
   .key-workspaces {
     grid-template-columns:1fr
-  }
-  .sidebar-note h3 {
-    font-size:12px
   }
 }
 
@@ -1327,8 +1292,9 @@ main {
     display:none
   }
   .sidebar nav {
-    display:flex;
-    gap:8px
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:4px 8px
   }
   .nav-item {
     font-size:11px;
