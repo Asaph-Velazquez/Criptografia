@@ -127,8 +127,6 @@ docker build -t nexo:local .
 docker compose up -d --no-build
 ```
 
-La guía completa para publicar la imagen en Docker Hub y desplegarla en Amazon EC2 con HTTPS mediante Application Load Balancer está en [DEPLOYMENT.md](DEPLOYMENT.md).
-
 ## Autores
 
 - Carmona Marinez Ricardo
