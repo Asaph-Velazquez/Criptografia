@@ -1,30 +1,21 @@
 # Nexo · Frontend React + Vite
 
-Interfaz en español para el backend de criptografía híbrida. Incluye envío y recepción, generación local de llaves RSA/DH, carga de llaves existentes y Thinking Orb durante el procesamiento. Las llaves y los resultados se mantienen en memoria; recargar o cerrar la página termina la sesión.
+Interfaz en español para el backend de criptografía híbrida. Incluye envío y recepción, generación de llaves RSA/ECDSA/DH, lectura de PEM existentes y Thinking Orb durante el procesamiento. Las llaves y los resultados se mantienen en memoria; recargar o cerrar la página termina la sesión.
 
-## Ejecutar en desarrollo
+## Ejecutar sin instalaciones locales
 
-Desde `Frontend`:
+Desde la raíz del proyecto, con Docker Desktop activo:
 
-```sh
-npm ci
-npm run dev
+```powershell
+.\run.ps1
 ```
 
-Abre http://localhost:5173. Vite reenvía `/api` al backend en `http://127.0.0.1:8080`. Si el puerto 5173 está ocupado por este proyecto, usa el servidor existente.
-
-Desde la raíz del backend, en otra terminal:
-
-```sh
-./mvnw spring-boot:run -Djava.version=23
-```
-
-En PowerShell también puedes usar `./mvnw.cmd`. El POM está configurado para Java 25; el argumento permite trabajar con el JDK 23 disponible en este entorno. Con JDK 25 puedes omitirlo.
+Abre http://localhost:8080. Docker compila React y Java y sirve la interfaz y la API juntas. No necesitas instalar Node.js, npm, Java ni Maven. Consulta [las instrucciones completas](../README.md#ejecución-local).
 
 ## Primer intercambio
 
 1. El destinatario crea llaves de intercambio en **Mis llaves**, descarga ambos JSON y comparte únicamente `intercambio-publico.json`.
-2. El remitente prepara sus llaves de firma RSA y comparte `firma-publica.pem` con el destinatario. También se aceptan llaves PEM existentes: privada PKCS#8 y pública X.509.
+2. El remitente elige RSA o ECDSA P-256 en **Mis llaves**, genera el par y comparte solo la pública con el destinatario. También se aceptan PEM existentes: privada PKCS#8 sin contraseña y pública X.509 (SPKI). Al cargar una llave se valida y detecta su algoritmo.
 3. En **Enviar archivo**, carga el archivo, indica el remitente y elige cifrar, firmar o ambos. Para cifrar carga el JSON público del destinatario; para firmar, su propia privada PEM.
 4. Descarga el paquete JSON y compártelo. En **Recibir paquete**, el destinatario carga ese paquete, su respaldo privado DH y la pública PEM del remitente. Selecciona solo las operaciones correspondientes al paquete: firma sin cifrado requiere desactivar **Descifrar archivo**.
 5. El resultado permite descargar los bytes originales. Una firma incorrecta bloquea la descarga. Descifrar sin verificar muestra que no se solicitó comprobar la integridad.
@@ -43,23 +34,15 @@ El frontend genera las llaves en el navegador con Web Crypto y generación aleat
 
 ## Verificar
 
-```sh
-npm run lint
-npm run build
-npm test
+```powershell
+.\run.ps1 test
 ```
 
-Con Vite y Spring Boot activos:
-
-```sh
-npm run test:integration
-```
-
-La prueba de integración usa el mismo cliente multipart de la interfaz. Comprueba los tres modos, igualdad exacta de bytes, nombres de descarga y rechazo de firmas alteradas. Las pruebas no usan llaves ni archivos personales.
+Ejecuta el comando desde la raíz. Todas las pruebas se ejecutan en Docker. La integración usa el mismo cliente multipart de la interfaz y comprueba RSA y ECDSA, los tres modos, igualdad exacta de bytes, nombres de descarga y rechazo de firmas alteradas y llaves incorrectas. Las pruebas no usan llaves ni archivos personales.
 
 ## Publicación
 
-Para empaquetar interfaz y backend en una sola imagen y desplegarla en EC2, sigue [la guía de Docker y despliegue](../DEPLOYMENT.md).
+Para empaquetar interfaz y backend en una sola imagen, consulta [Docker y despliegue](../README.md#despliegue).
 
 `npm run build` genera `dist`. Sirve esa carpeta con una ruta `/api` hacia Spring Boot o define `VITE_API_BASE_URL` al compilar. Si frontend y backend están en orígenes distintos, configura `crypto.cors.allowed-origins` en Spring Boot; sus valores locales predeterminados incluyen los puertos 5173 y 3000. Las APIs de generación de llaves requieren un contexto seguro (HTTPS o localhost).
 

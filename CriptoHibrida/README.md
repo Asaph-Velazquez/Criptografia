@@ -19,10 +19,10 @@
 ## Características
 
 - Cifrado de archivos con AES-256-CBC derivado de un intercambio Diffie-Hellman.
-- Firma y verificación de integridad con RSA y SHA-256.
+- Firma y verificación con RSA-2048 o ECDSA P-256, ambos con SHA-256.
 - Flujos independientes: cifrar, firmar, descifrar o verificar; también se pueden combinar.
 - Paquetes JSON transportables que preservan archivos binarios sin modificar sus bytes.
-- Generación local de llaves RSA y parámetros de intercambio en el navegador mediante Web Crypto.
+- Generación y lectura de llaves PEM RSA/ECDSA y parámetros de intercambio en el navegador mediante Web Crypto.
 - Interfaz React accesible en español, adaptada para escritorio y móvil.
 - Descarga bloqueada cuando una firma no supera la verificación de integridad.
 
@@ -33,7 +33,7 @@ flowchart LR
     B[React + Vite] -->|multipart/form-data| A[Spring Boot API]
     A --> D[Diffie-Hellman]
     D --> C[AES-256-CBC]
-    A --> R[RSA + SHA-256]
+    A --> R[RSA o ECDSA + SHA-256]
     C --> P[Paquete JSON]
     R --> P
 ```
@@ -46,44 +46,55 @@ El frontend prepara las llaves y solicitudes. El backend procesa exclusivamente 
 | --- | --- |
 | Interfaz | React 19, TypeScript, Vite y Thinking Orbs |
 | API | Java 21 y Spring Boot 4 |
-| Criptografía | Diffie-Hellman, AES/CBC/PKCS5Padding, RSA/SHA-256 |
+| Criptografía | Diffie-Hellman, AES/CBC/PKCS5Padding, RSA o ECDSA/SHA-256 |
 | Contenedores | Docker y Docker Compose |
 
 ## Ejecución local
 
 ### Requisitos
 
-- JDK 21 o posterior.
-- Node.js 24 o posterior.
-- Docker Desktop, solo si se usará el contenedor.
+- Docker Desktop activo, con contenedores Linux y Docker Compose v2.
+- PowerShell para `run.ps1` (incluido en Windows).
+- Internet durante la primera compilación para descargar imágenes y dependencias.
 
-### Desarrollo
+**No necesitas instalar Java, Maven, Node.js, npm ni una base de datos.** La compilación de React, las pruebas y el empaquetado de Spring Boot ocurren en Docker. Las llaves se generan en el navegador y no se guardan en la imagen ni en volúmenes.
 
-En una terminal, inicia la API desde la raíz del proyecto:
+### Iniciar todo
 
-```powershell
-.\mvnw.cmd spring-boot:run
-```
-
-En otra terminal, inicia la interfaz:
+Desde la raíz del proyecto:
 
 ```powershell
-cd Frontend
-npm ci
-npm run dev
+.\run.ps1
 ```
 
-Abre `http://localhost:5173`. Vite reenvía las rutas `/api` a Spring Boot en `http://127.0.0.1:8080`.
+Abre **http://localhost:8080**. La interfaz y la API se sirven desde el mismo contenedor; no hace falta iniciar Vite ni otra terminal. El script reconstruye cuando hay cambios y espera a que el contenedor esté saludable; un error detiene la ejecución.
+
+Si Windows bloquea scripts, puedes ejecutarlo sin cambiar la política permanentemente:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\run.ps1
+```
+
+```powershell
+.\run.ps1 up -Port 9090  # Puerto alternativo
+.\run.ps1 logs           # Seguir registros
+.\run.ps1 status         # Estado de los contenedores
+.\run.ps1 down           # Detener y retirar contenedores
+```
+
+El servicio se enlaza a `127.0.0.1` por defecto. Para publicar en otra interfaz configura `NEXO_BIND_ADDRESS` y utiliza HTTPS. No se requieren archivos `.env` ni claves preexistentes.
 
 ## Uso
 
 1. El destinatario crea y descarga su intercambio de llaves desde **Mis llaves**. Comparte solo el archivo público.
-2. El remitente carga el archivo y elige cifrado, firma o ambos. Para firmar utiliza su llave privada RSA.
-3. El remitente descarga el paquete JSON y comparte también su llave pública RSA cuando haya firmado.
-4. El destinatario carga el paquete, su respaldo privado Diffie-Hellman y, si aplica, la llave pública RSA del remitente.
+2. En **Mis llaves**, el remitente elige **RSA** o **ECDSA P-256** y genera y descarga su par de firma. También puede cargar llaves existentes: privada PKCS#8 sin contraseña y pública X.509 (SPKI), ambas en PEM.
+3. En **Enviar archivo**, elige cifrado, firma o ambos. Carga la privada de firma; se valida y detecta su algoritmo automáticamente. Comparte el paquete JSON y solo la llave pública de firma.
+4. El destinatario carga el paquete, su respaldo privado Diffie-Hellman y, si aplica, la llave pública RSA o ECDSA del remitente. El algoritmo de verificación se lee del paquete.
 5. Nexo recupera el archivo solo si las operaciones solicitadas se completan. Cuando la firma no coincide, bloquea la descarga.
 
-No compartas respaldos privados ni llaves privadas RSA. Para un sitio público usa HTTPS: las APIs criptográficas del navegador requieren un contexto seguro fuera de `localhost`.
+No compartas respaldos ni llaves privadas. Las llaves PEM necesarias se envían a la API para procesar el archivo y no se persisten. Para un sitio público usa HTTPS: las APIs criptográficas del navegador requieren un contexto seguro fuera de `localhost`.
+
+Los paquetes RSA anteriores siguen funcionando. ECDSA utiliza la curva P-256 (`secp256r1`), SHA-256 y firmas ASN.1 DER. No se admiten privadas SEC1 (`BEGIN EC PRIVATE KEY`) ni curvas diferentes de P-256.
 
 ## API y límites
 
@@ -94,38 +105,27 @@ No compartas respaldos privados ni llaves privadas RSA. Para un sitio público u
 
 Las solicitudes son `multipart/form-data`. El archivo de entrada admite hasta 10 MiB; un paquete recibido, hasta 16 MiB; y una llave PEM, hasta 64 KiB. Las respuestas usan `400` para solicitudes inválidas, `413` para tamaños excedidos y `422` para errores de integridad.
 
+Para firmar, `options.signatureAlgorithm` acepta `RSA` (predeterminado) o `ECDSA`. Los paquetes ECDSA incluyen `signature_algorithm: "ECDSA"`; sin ese campo se interpreta RSA. La recepción no necesita indicar el algoritmo. La firma cubre los bytes originales, no los nombres ni los metadatos.
+
 ## Verificación
 
-Frontend:
+Toda la verificación se ejecuta en contenedores:
 
 ```powershell
-cd Frontend
-npm run lint
-npm run build
-npm test
+.\run.ps1 test
 ```
 
-Backend:
-
-```powershell
-.\mvnw.cmd test
-```
-
-Con ambos servicios activos, la prueba de integración verifica los tres modos de operación, conserva los bytes originales y rechaza firmas alteradas:
-
-```powershell
-cd Frontend
-npm run test:integration
-```
+Incluye lint, pruebas y build del frontend, pruebas Maven del backend e integración HTTP real con RSA y ECDSA, cifrado opcional, preservación binaria y rechazo de firmas alteradas y llaves incorrectas. Si falla alguna prueba, el script termina con error. Al finalizar, la aplicación permanece activa; detenla con `.\run.ps1 down`.
 
 ## Despliegue
 
 El proyecto incluye una imagen multietapa que compila la interfaz y la sirve desde Spring Boot, además de un archivo `compose.yaml` con límites de memoria, sistema de archivos de solo lectura y health check.
 
 ```sh
-docker build -t nexo:local .
-docker compose up -d --no-build
+docker compose up --build -d --wait nexo
 ```
+
+La imagen final solo contiene el JRE y la aplicación compilada; Node.js y Maven permanecen en las etapas de construcción. Los servicios del perfil `test` solo se ejecutan al solicitarlos, no en el arranque normal. Para probar sin PowerShell: `docker compose --profile test run --build --rm integration-tests` (construye y levanta también la aplicación).
 
 ## Autores
 

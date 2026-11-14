@@ -26,6 +26,16 @@
   },
   "features": [
     {
+      "id": 9,
+      "name": "docker_runner_ecdsa",
+      "module": "crypto-service-storage-orchestration-api-frontend-deployment",
+      "title": "Dockerizar ejecucion y pruebas y agregar firma y llaves ECDSA",
+      "allowed_paths": ["src/", "Frontend/", "Dockerfile", "compose.yaml", "run.ps1", ".dockerignore", "README.md", ".agents/feature_list.json"],
+      "verification": ["./mvnw test", "docker compose --profile test run --rm integration-tests", "docker compose up --build --wait"],
+      "status": "blocked",
+      "verification_notes": "Implementacion lista: run.ps1, servicios de pruebas en Compose y firma/generacion/lectura ECDSA P-256 con compatibilidad RSA. Pasaron npm run lint, npm run build y 8 pruebas Node, y diff --check del proyecto ignorando CRLF. Agregadas pruebas Java de ECDSA, esquema y API, e integracion HTTP con ambos algoritmos. Pendiente validar Maven, PowerShell y contenedores en el equipo del usuario: este entorno no tiene JDK utilizable (mvnw falla por JAVA_HOME), pwsh ni Docker operativo (CLI indica que falta integracion WSL). Ejecutar .\\run.ps1 test y .\\run.ps1 para completar la verificacion."
+    },
+    {
       "id": 1,
       "name": "dh_key_exchange_service",
       "module": "crypto-service",
