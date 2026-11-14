@@ -15,12 +15,20 @@ public final class PemUtils {
     private PemUtils() { }
 
     public static PrivateKey parsePrivateKey(byte[] pem) throws GeneralSecurityException {
-        return KeyFactory.getInstance("RSA").generatePrivate(
+        return parsePrivateKey(pem, "RSA");
+    }
+
+    public static PrivateKey parsePrivateKey(byte[] pem, String algorithm) throws GeneralSecurityException {
+        return KeyFactory.getInstance(algorithm).generatePrivate(
                 new PKCS8EncodedKeySpec(decode(pem, "PRIVATE KEY")));
     }
 
     public static PublicKey parsePublicKey(byte[] pem) throws GeneralSecurityException {
-        return KeyFactory.getInstance("RSA").generatePublic(
+        return parsePublicKey(pem, "RSA");
+    }
+
+    public static PublicKey parsePublicKey(byte[] pem, String algorithm) throws GeneralSecurityException {
+        return KeyFactory.getInstance(algorithm).generatePublic(
                 new X509EncodedKeySpec(decode(pem, "PUBLIC KEY")));
     }
 

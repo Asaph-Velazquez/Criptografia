@@ -1,19 +1,20 @@
 import { useState } from 'react'
 import { ThinkingOrb } from 'thinking-orbs'
 import { Icon } from './Icon'
-import { download, downloadJson, generateDh, generateRsa, publicDh } from '../lib/keys'
-import type { DhKeys } from '../lib/keys'
+import { download, downloadJson, generateDh, generateRsa, generateEcdsa, publicDh } from '../lib/keys'
+import type { DhKeys, SignatureAlgorithm, SigningKeys } from '../lib/keys'
 
-export function KeyManager({ onUseDh, onUseRsa }: { onUseDh: (keys: DhKeys) => void; onUseRsa: (keys: { privateKey: File; publicKey: File }) => void }) {
+export function KeyManager({ onUseDh, onUseSigning }: { onUseDh: (keys: DhKeys) => void; onUseSigning: (keys: SigningKeys, algorithm: SignatureAlgorithm) => void }) {
   const [dh, setDh] = useState<DhKeys | null>(null)
   const [rsa, setRsa] = useState<{ privateKey: File; publicKey: File } | null>(null)
   const [busy, setBusy] = useState<'dh' | 'rsa' | null>(null)
   const [message, setMessage] = useState('')
+  const [algorithm, setAlgorithm] = useState<SignatureAlgorithm>('RSA')
   async function generate(type: 'dh' | 'rsa') {
     setMessage(''); setBusy(type)
     try {
       await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
-      if (type === 'dh') setDh(generateDh()); else setRsa(await generateRsa())
+      if (type === 'dh') setDh(generateDh()); else setRsa(await (algorithm === 'ECDSA' ? generateEcdsa() : generateRsa()))
     } catch { setMessage('No se pudieron crear las llaves. Abre la aplicación en localhost o HTTPS y vuelve a intentar.') }
     finally { setBusy(null) }
   }
@@ -30,9 +31,10 @@ export function KeyManager({ onUseDh, onUseRsa }: { onUseDh: (keys: DhKeys) => v
       </article>
       <article className="key-workspace"><div className="key-heading"><span className="feature-icon"><Icon name="sign" size={25} /></span><span className="subtle-tag">Para firmar archivos</span></div>
         <h2>Llaves de firma</h2><p>Firma con tu llave privada. Quien recibe el archivo usa tu llave pública para comprobar que sus bytes no cambiaron.</p>
-        <ul className="key-facts"><li>Firma RSA de 2048 bits con SHA-256</li><li>Privada en formato PKCS#8</li><li>Pública en formato X.509</li></ul>
-        <button className="primary-button" disabled={busy !== null} onClick={() => generate('rsa')}>{busy === 'rsa' ? <ThinkingOrb state="solving" size={20} theme="dark" /> : <Icon name="plus" size={18} />}{rsa ? 'Crear un nuevo par RSA' : 'Crear llaves de firma'}</button>
-        {rsa && <div className="generated-keys"><p><Icon name="check" size={16} /> Llaves listas</p><button className="download-row" onClick={() => download(rsa.publicKey, rsa.publicKey.name)}><span>Pública · compartir</span><Icon name="download" size={18} /></button><button className="download-row" onClick={() => download(rsa.privateKey, rsa.privateKey.name)}><span>Privada · conservar</span><Icon name="download" size={18} /></button><button className="text-button" onClick={() => { onUseRsa(rsa); setMessage('Llaves de firma listas para enviar y recibir en esta sesión.') }}>Usar en esta sesión <Icon name="arrow" size={16} /></button></div>}
+        <label className="text-field algorithm-field">Algoritmo de firma<select value={algorithm} disabled={busy !== null} onChange={event => { setAlgorithm(event.target.value as SignatureAlgorithm); setRsa(null); setMessage('') }}><option value="RSA">RSA · 2048 bits</option><option value="ECDSA">ECDSA · P-256</option></select></label>
+        <ul className="key-facts"><li>{algorithm === 'ECDSA' ? 'Firma ECDSA P-256 con SHA-256' : 'Firma RSA de 2048 bits con SHA-256'}</li><li>Privada en formato PKCS#8</li><li>Pública en formato X.509</li></ul>
+        <button className="primary-button" disabled={busy !== null} onClick={() => generate('rsa')}>{busy === 'rsa' ? <ThinkingOrb state="solving" size={20} theme="dark" /> : <Icon name="plus" size={18} />}{rsa ? `Crear un nuevo par ${algorithm}` : `Crear llaves ${algorithm}`}</button>
+        {rsa && <div className="generated-keys"><p><Icon name="check" size={16} /> Llaves listas</p><button className="download-row" onClick={() => download(rsa.publicKey, rsa.publicKey.name)}><span>Pública · compartir</span><Icon name="download" size={18} /></button><button className="download-row" onClick={() => download(rsa.privateKey, rsa.privateKey.name)}><span>Privada · conservar</span><Icon name="download" size={18} /></button><button className="text-button" onClick={() => { onUseSigning(rsa, algorithm); setMessage('Llaves de firma listas para enviar y recibir en esta sesión.') }}>Usar en esta sesión <Icon name="arrow" size={16} /></button></div>}
       </article>
     </div>
     <p className="footnote">Si creas otro par, descarga primero el actual. Las llaves nuevas no abren archivos protegidos con las anteriores.</p>

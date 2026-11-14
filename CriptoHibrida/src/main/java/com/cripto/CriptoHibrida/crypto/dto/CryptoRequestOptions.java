@@ -2,6 +2,7 @@ package com.cripto.CriptoHibrida.crypto.dto;
 
 import com.cripto.CriptoHibrida.crypto.model.DhParameters;
 import com.cripto.CriptoHibrida.crypto.model.ProcessOptions;
+import com.cripto.CriptoHibrida.crypto.model.SignatureAlgorithm;
 import java.math.BigInteger;
 
 /**
@@ -11,7 +12,11 @@ import java.math.BigInteger;
  */
 public record CryptoRequestOptions(Boolean encrypt, Boolean sign, Boolean decrypt, Boolean verify,
                                    String remitente, String g, String n, String publicK,
-                                   String publicIv, String privateK, String privateIv) {
+                                    String publicIv, String privateK, String privateIv, String signatureAlgorithm) {
+    public SignatureAlgorithm signingAlgorithm() {
+        return SignatureAlgorithm.parse(signatureAlgorithm);
+    }
+
     public ProcessOptions processOptions() {
         return new ProcessOptions(Boolean.TRUE.equals(encrypt), Boolean.TRUE.equals(sign),
                 Boolean.TRUE.equals(decrypt), Boolean.TRUE.equals(verify));

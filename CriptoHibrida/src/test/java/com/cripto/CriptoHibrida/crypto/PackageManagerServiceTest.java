@@ -57,6 +57,19 @@ class PackageManagerServiceTest {
     }
 
     @Test
+    void supportsExplicitEcdsaAndRejectsInvalidAlgorithms() {
+        var legacy = service.deserialize(VALID.getBytes(StandardCharsets.UTF_8));
+        assertEquals(com.cripto.CriptoHibrida.crypto.model.SignatureAlgorithm.RSA, legacy.signatureAlgorithm());
+        var ecdsa = new EncryptedPackage("Ana", "a.bin", null, null, new byte[]{1}, new byte[]{2},
+                com.cripto.CriptoHibrida.crypto.model.SignatureAlgorithm.ECDSA);
+        assertEquals(ecdsa.signatureAlgorithm(), service.deserialize(service.serialize(ecdsa)).signatureAlgorithm());
+        for (String algorithm : new String[]{"null", "42", "\"DSA\"", "\"ecdsa\"", "\"\""}) {
+            String json = VALID.replace("\"remitente\":", "\"signature_algorithm\":" + algorithm + ",\"remitente\":");
+            assertThrows(IllegalArgumentException.class, () -> service.deserialize(json.getBytes(StandardCharsets.UTF_8)));
+        }
+    }
+
+    @Test
     void writesAndReadsJsonFiles(@TempDir Path directory) throws Exception {
         EncryptedPackage original = service.deserialize(VALID.getBytes(StandardCharsets.UTF_8));
         Path file = directory.resolve("package.json");

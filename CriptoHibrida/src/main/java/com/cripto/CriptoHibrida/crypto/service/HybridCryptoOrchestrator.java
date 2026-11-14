@@ -3,6 +3,7 @@ package com.cripto.CriptoHibrida.crypto.service;
 import com.cripto.CriptoHibrida.crypto.model.DhParameters;
 import com.cripto.CriptoHibrida.crypto.model.EncryptedPackage;
 import com.cripto.CriptoHibrida.crypto.model.ProcessOptions;
+import com.cripto.CriptoHibrida.crypto.model.SignatureAlgorithm;
 import com.cripto.CriptoHibrida.crypto.model.VerificationResult;
 import com.cripto.CriptoHibrida.crypto.model.VerificationResult.IntegrityStatus;
 import com.cripto.CriptoHibrida.crypto.util.PemUtils;
@@ -19,13 +20,15 @@ public class HybridCryptoOrchestrator {
     private final DiffieHellmanService dh;
     private final AesCipherService aes;
     private final RsaSignerService rsa;
+    private final EcdsaSignerService ecdsa;
     private final PackageManagerService packages;
 
     public HybridCryptoOrchestrator(DiffieHellmanService dh, AesCipherService aes,
-                                    RsaSignerService rsa, PackageManagerService packages) {
+                                    RsaSignerService rsa, EcdsaSignerService ecdsa, PackageManagerService packages) {
         this.dh = dh;
         this.aes = aes;
         this.rsa = rsa;
+        this.ecdsa = ecdsa;
         this.packages = packages;
     }
 
@@ -33,6 +36,14 @@ public class HybridCryptoOrchestrator {
     public byte[] emit(byte[] file, String sender, String filename, ProcessOptions options,
                        DhParameters parameters, BigInteger recipientPublicK, BigInteger recipientPublicIv,
                        byte[] privateKeyPem) throws GeneralSecurityException {
+        return emit(file, sender, filename, options, parameters, recipientPublicK, recipientPublicIv,
+                privateKeyPem, SignatureAlgorithm.RSA);
+    }
+
+    public byte[] emit(byte[] file, String sender, String filename, ProcessOptions options,
+                       DhParameters parameters, BigInteger recipientPublicK, BigInteger recipientPublicIv,
+                       byte[] privateKeyPem, SignatureAlgorithm algorithm) throws GeneralSecurityException {
+        require(algorithm, "signatureAlgorithm");
         require(options, "options");
         options.requireEmission();
         require(file, "file");
@@ -41,7 +52,8 @@ public class HybridCryptoOrchestrator {
         byte[] signature = null;
         if (options.sign()) {
             require(privateKeyPem, "privateKeyPem");
-            signature = rsa.sign(file, PemUtils.parsePrivateKey(privateKeyPem));
+            var key = PemUtils.parsePrivateKey(privateKeyPem, algorithm.keyAlgorithm());
+            signature = algorithm == SignatureAlgorithm.ECDSA ? ecdsa.sign(file, key) : rsa.sign(file, key);
         }
         BigInteger publicK = null;
         BigInteger publicIv = null;
@@ -63,7 +75,8 @@ public class HybridCryptoOrchestrator {
                 Arrays.fill(iv, (byte) 0);
             }
         }
-        return packages.serialize(new EncryptedPackage(sender, filename, publicK, publicIv, payload, signature));
+        return packages.serialize(new EncryptedPackage(sender, filename, publicK, publicIv, payload, signature,
+                options.sign() ? algorithm : SignatureAlgorithm.RSA));
     }
 
     /** Recipient supplies b and d locally; the uploaded JSON contains only sender public values. */
@@ -86,7 +99,8 @@ public class HybridCryptoOrchestrator {
                 throw new IllegalArgumentException("The package has no signature to verify");
             }
         }
-        var publicKey = options.verify() ? PemUtils.parsePublicKey(publicKeyPem) : null;
+        var publicKey = options.verify()
+                ? PemUtils.parsePublicKey(publicKeyPem, value.signatureAlgorithm().keyAlgorithm()) : null;
         byte[] recovered = value.ciphertext();
         if (options.decrypt()) {
             require(parameters, "parameters");
@@ -104,7 +118,9 @@ public class HybridCryptoOrchestrator {
             }
         }
         try {
-            if (options.verify() && !rsa.verify(recovered, value.firma(), publicKey)) {
+            if (options.verify() && !(value.signatureAlgorithm() == SignatureAlgorithm.ECDSA
+                    ? ecdsa.verify(recovered, value.firma(), publicKey)
+                    : rsa.verify(recovered, value.firma(), publicKey))) {
                 return result(value, IntegrityStatus.FAILED, null);
             }
             return result(value, options.verify() ? IntegrityStatus.VERIFIED : IntegrityStatus.NOT_REQUESTED,

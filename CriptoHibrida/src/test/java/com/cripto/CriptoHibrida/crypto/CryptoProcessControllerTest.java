@@ -142,6 +142,46 @@ class CryptoProcessControllerTest {
                 .andExpect(status().isOk()).andExpect(content().bytes(new byte[0]));
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void ecdsaRoundTripAndTampering(boolean encrypt) throws Exception {
+        var generator = KeyPairGenerator.getInstance("EC");
+        generator.initialize(new java.security.spec.ECGenParameterSpec("secp256r1"));
+        var keys = generator.generateKeyPair();
+        byte[] data = new byte[4097];
+        new Random(42).nextBytes(data);
+        var options = emission(encrypt, true);
+        options.put("signatureAlgorithm", "ECDSA");
+        byte[] json = mvc.perform(multipart("/api/crypto/process")
+                .file(new MockMultipartFile("file", "video.mp4", "application/octet-stream", data))
+                .file(optionsPart(options))
+                .file(new MockMultipartFile("privateKey", "ec.pem", "application/x-pem-file",
+                        pem("PRIVATE KEY", keys.getPrivate().getEncoded()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.signature_algorithm").value("ECDSA"))
+                .andReturn().getResponse().getContentAsByteArray();
+        var publicPart = new MockMultipartFile("publicKey", "ec.pem", "application/x-pem-file",
+                pem("PUBLIC KEY", keys.getPublic().getEncoded()));
+        mvc.perform(multipart("/api/crypto/verify-decrypt")
+                .file(new MockMultipartFile("package", "package.json", "application/json", json))
+                .file(optionsPart(reception(encrypt, true))).file(publicPart))
+                .andExpect(status().isOk()).andExpect(content().bytes(data))
+                .andExpect(header().string("X-Integrity-Status", "VERIFIED"));
+        var value = packages.deserialize(json);
+        byte[] changed = packages.serialize(new EncryptedPackage(value.remitente(), value.nombreArchivo(),
+                value.dhPublicK(), value.dhPublicIv(), value.ciphertext(), new byte[64], value.signatureAlgorithm()));
+        mvc.perform(multipart("/api/crypto/verify-decrypt")
+                .file(new MockMultipartFile("package", "package.json", "application/json", changed))
+                .file(optionsPart(reception(encrypt, true))).file(publicPart))
+                .andExpect(status().is(422)).andExpect(jsonPath("$.code").value("INTEGRITY_FAILED"));
+        options.put("signatureAlgorithm", "DSA");
+        mvc.perform(multipart("/api/crypto/process")
+                .file(new MockMultipartFile("file", "a.bin", "application/octet-stream", data))
+                .file(optionsPart(options)).file(new MockMultipartFile("privateKey", "ec.pem",
+                        "application/x-pem-file", pem("PRIVATE KEY", keys.getPrivate().getEncoded()))))
+                .andExpect(status().isBadRequest());
+    }
+
     @Test
     void tamperingReturns422WithoutRecoveredFile() throws Exception {
         EncryptedPackage original = packages.deserialize(emit(new byte[64], true, true));

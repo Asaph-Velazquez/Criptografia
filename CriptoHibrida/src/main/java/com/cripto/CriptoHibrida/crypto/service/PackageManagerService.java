@@ -1,6 +1,7 @@
 package com.cripto.CriptoHibrida.crypto.service;
 
 import com.cripto.CriptoHibrida.crypto.model.EncryptedPackage;
+import com.cripto.CriptoHibrida.crypto.model.SignatureAlgorithm;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -36,6 +37,10 @@ public class PackageManagerService {
         root.put("ciphertext", Base64.getEncoder().encodeToString(value.ciphertext()));
         byte[] signature = value.firma();
         root.put("firma", signature == null ? null : Base64.getEncoder().encodeToString(signature));
+        // Preserve the legacy RSA schema; ECDSA packages carry their verification algorithm.
+        if (value.signatureAlgorithm() != SignatureAlgorithm.RSA) {
+            root.put("signature_algorithm", value.signatureAlgorithm().name());
+        }
         return mapper.writeValueAsBytes(root);
     }
 
@@ -43,13 +48,20 @@ public class PackageManagerService {
     public EncryptedPackage deserialize(byte[] json) {
         Objects.requireNonNull(json, "json");
         JsonNode root = mapper.readTree(json);
-        if (root == null || !root.isObject() || !Set.copyOf(root.propertyNames()).equals(FIELDS)) {
-            throw new IllegalArgumentException("Expected exactly the six encrypted-package fields");
+        if (root == null || !root.isObject()) {
+            throw new IllegalArgumentException("Expected an encrypted-package object");
+        }
+        var fields = new java.util.HashSet<>(root.propertyNames());
+        fields.remove("signature_algorithm");
+        if (!fields.equals(FIELDS)) {
+            throw new IllegalArgumentException("Unexpected encrypted-package fields");
         }
         return new EncryptedPackage(text(root, "remitente"), text(root, "nombre_archivo"),
                 dhValue(root, "dh_public_k"), dhValue(root, "dh_public_iv"),
                 decode(text(root, "ciphertext")),
-                root.get("firma").isNull() ? null : decode(text(root, "firma")));
+                root.get("firma").isNull() ? null : decode(text(root, "firma")),
+                root.has("signature_algorithm") ? SignatureAlgorithm.parse(text(root, "signature_algorithm"))
+                        : SignatureAlgorithm.RSA);
     }
 
     public void write(EncryptedPackage value, OutputStream output) throws IOException {

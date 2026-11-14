@@ -27,7 +27,7 @@ class HybridCryptoOrchestratorTest {
     private final DiffieHellmanService dh = new DiffieHellmanService();
     private final PackageManagerService packages = new PackageManagerService();
     private final HybridCryptoOrchestrator service = new HybridCryptoOrchestrator(
-            dh, new AesCipherService(), new RsaSignerService(), packages);
+            dh, new AesCipherService(), new RsaSignerService(), new EcdsaSignerService(), packages);
 
     @BeforeAll
     static void setup() throws Exception {

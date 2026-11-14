@@ -71,7 +71,7 @@ public class CryptoProcessController {
                     selected.encrypt() ? options.parameters() : null,
                     selected.encrypt() ? CryptoRequestOptions.integer(options.publicK(), "publicK") : null,
                     selected.encrypt() ? CryptoRequestOptions.integer(options.publicIv(), "publicIv") : null,
-                    privatePem);
+                    privatePem, options.signingAlgorithm());
             return download(json, "package.json", MediaType.APPLICATION_JSON);
         } finally {
             if (privatePem != null) {

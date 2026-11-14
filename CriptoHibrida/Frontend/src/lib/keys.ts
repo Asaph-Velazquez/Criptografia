@@ -9,6 +9,8 @@ export const DH_N = BigInt('0x' +
   '728E5A8AACAA68FFFFFFFFFFFFFFFF').toString()
 
 export interface DhKeys { g: string; n: string; publicK: string; publicIv: string; privateK?: string; privateIv?: string }
+export type SignatureAlgorithm = 'RSA' | 'ECDSA'
+export interface SigningKeys { privateKey: File; publicKey: File }
 
 function modPow(base: bigint, exponent: bigint, modulus: bigint): bigint {
   let value = 1n
@@ -71,6 +73,36 @@ export async function generateRsa(): Promise<{ privateKey: File; publicKey: File
     privateKey: new File([pem(await crypto.subtle.exportKey('pkcs8', keys.privateKey), 'PRIVATE KEY')], 'firma-privada.pem', { type: 'application/x-pem-file' }),
     publicKey: new File([pem(await crypto.subtle.exportKey('spki', keys.publicKey), 'PUBLIC KEY')], 'firma-publica.pem', { type: 'application/x-pem-file' }),
   }
+}
+
+export async function generateEcdsa(): Promise<SigningKeys> {
+  const keys = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify'])
+  return {
+    privateKey: new File([pem(await crypto.subtle.exportKey('pkcs8', keys.privateKey), 'PRIVATE KEY')], 'firma-ecdsa-privada.pem', { type: 'application/x-pem-file' }),
+    publicKey: new File([pem(await crypto.subtle.exportKey('spki', keys.publicKey), 'PUBLIC KEY')], 'firma-ecdsa-publica.pem', { type: 'application/x-pem-file' }),
+  }
+}
+
+/** Import to validate both the PEM format and the supported algorithm before uploading. */
+export async function readSigningKey(file: File, privateRequired: boolean): Promise<SignatureAlgorithm> {
+  if (file.size > 65536) throw new Error('La llave PEM no debe superar 64 KB.')
+  const label = privateRequired ? 'PRIVATE KEY' : 'PUBLIC KEY'
+  const text = (await file.text()).trim()
+  const match = new RegExp(`^-----BEGIN ${label}-----([A-Za-z0-9+/=\\r\\n\\t ]+)-----END ${label}-----$`).exec(text)
+  if (!match) throw new Error(`Carga una llave ${privateRequired ? 'privada PKCS#8' : 'pública X.509'} en formato PEM sin contraseña.`)
+  let bytes: Uint8Array<ArrayBuffer>
+  try { bytes = Uint8Array.from(atob(match[1].replace(/\s/g, '')), char => char.charCodeAt(0)) }
+  catch { throw new Error('La codificación Base64 de la llave PEM no es válida.') }
+  for (const algorithm of ['RSA', 'ECDSA'] as const) {
+    try {
+      const key = await crypto.subtle.importKey(privateRequired ? 'pkcs8' : 'spki', bytes,
+        algorithm === 'RSA' ? { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' } : { name: 'ECDSA', namedCurve: 'P-256' },
+        false, [privateRequired ? 'sign' : 'verify'])
+      if (algorithm === 'RSA' && (key.algorithm as RsaKeyAlgorithm).modulusLength < 2048) continue
+      return algorithm
+    } catch { /* Try the other supported key algorithm. */ }
+  }
+  throw new Error('La llave debe ser RSA de al menos 2048 bits o ECDSA P-256.')
 }
 
 export function download(blob: Blob, filename: string) {

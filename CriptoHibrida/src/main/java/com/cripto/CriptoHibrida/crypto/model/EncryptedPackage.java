@@ -9,8 +9,14 @@ import java.util.Objects;
  */
 public record EncryptedPackage(String remitente, String nombreArchivo,
                                BigInteger dhPublicK, BigInteger dhPublicIv,
-                               byte[] ciphertext, byte[] firma) {
+                                byte[] ciphertext, byte[] firma, SignatureAlgorithm signatureAlgorithm) {
+    public EncryptedPackage(String remitente, String nombreArchivo, BigInteger dhPublicK,
+                            BigInteger dhPublicIv, byte[] ciphertext, byte[] firma) {
+        this(remitente, nombreArchivo, dhPublicK, dhPublicIv, ciphertext, firma, SignatureAlgorithm.RSA);
+    }
+
     public EncryptedPackage {
+        signatureAlgorithm = Objects.requireNonNull(signatureAlgorithm, "signatureAlgorithm");
         if (remitente == null || remitente.isBlank() || nombreArchivo == null || nombreArchivo.isBlank()) {
             throw new IllegalArgumentException("Sender and original filename are required");
         }

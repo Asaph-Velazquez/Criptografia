@@ -3,6 +3,21 @@
   min-height:100vh
 }
 
+.algorithm-field {
+  margin:18px 0;
+}
+
+.algorithm-field select {
+  display:block;
+  width:100%;
+  margin-top:8px;
+  padding:11px 12px;
+  color:var(--ink);
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:7px;
+}
+
 .sidebar {
   width:230px;
   background:#fff;
