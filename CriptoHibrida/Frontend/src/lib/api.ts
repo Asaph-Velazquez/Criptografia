@@ -13,7 +13,7 @@ export async function transfer(direction: 'send' | 'receive', file: File, option
   if (!response.ok) {
     if (response.status === 422) throw new Error('La integridad no pudo verificarse. No se descargó ningún archivo. Comprueba la llave pública y solicita el paquete original al remitente.')
     if (response.status === 413) throw new Error('El archivo supera el límite: 10 MB para enviar o 16 MB para un paquete recibido.')
-    if (response.status >= 500) throw new Error('No se pudo conectar con el servicio criptográfico. Comprueba que Spring Boot esté activo en el puerto 8080 y vuelve a intentar.')
+    if (response.status >= 500) throw new Error('Falló el servicio criptográfico. Revisa los contenedores con .\\run.ps1 status y .\\run.ps1 logs y vuelve a intentar.')
     throw new Error('El servicio rechazó la solicitud. Revisa que las llaves correspondan al archivo y a las operaciones elegidas.')
   }
   const blob = await response.blob()
